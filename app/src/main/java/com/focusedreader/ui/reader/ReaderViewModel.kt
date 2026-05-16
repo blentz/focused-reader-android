@@ -14,6 +14,7 @@ import com.focusedreader.reader.RsvpEngine
 import com.focusedreader.reader.WordTokenizer
 import com.focusedreader.reader.Wpm
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,15 +31,26 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ReaderViewModel @Inject constructor(
+class ReaderViewModel(
     private val sessions: SessionRepository,
     private val settings: SettingsRepository,
     private val orientation: OrientationMonitor,
     private val haptic: HapticController,
-    private val tts: TtsController
+    private val tts: TtsController,
+    // Production uses Dispatchers.Default. Tests inject a TestDispatcher so
+    // RsvpEngine ticks can be advanced via virtual time.
+    engineDispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
-    private val engine = RsvpEngine(Dispatchers.Default)
+    @Inject constructor(
+        sessions: SessionRepository,
+        settings: SettingsRepository,
+        orientation: OrientationMonitor,
+        haptic: HapticController,
+        tts: TtsController
+    ) : this(sessions, settings, orientation, haptic, tts, Dispatchers.Default)
+
+    private val engine = RsvpEngine(engineDispatcher)
     private val _state = MutableStateFlow<ReaderState>(ReaderState.Idle)
     val state: StateFlow<ReaderState> = _state
 

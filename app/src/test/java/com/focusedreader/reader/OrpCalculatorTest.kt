@@ -51,4 +51,48 @@ class OrpCalculatorTest {
         val s = OrpCalculator.split("---")
         assertEquals('-', s.pivot)
     }
+
+    @Test fun `single uppercase char picks self`() {
+        assertEquals('Z', OrpCalculator.split("Z").pivot)
+    }
+
+    @Test fun `all uppercase word treated like lowercase`() {
+        // HELLO -> 5 alphanum -> middle idx 2 -> 'L'
+        val s = OrpCalculator.split("HELLO")
+        assertEquals('L', s.pivot)
+        assertEquals("HE", s.left)
+        assertEquals("LO", s.right)
+    }
+
+    @Test fun `digits count as alphanumeric`() {
+        // "abc123" -> 6 alphanum -> after-middle idx 3 -> '1'
+        val s = OrpCalculator.split("abc123")
+        assertEquals('1', s.pivot)
+        assertEquals("abc", s.left)
+        assertEquals("23", s.right)
+    }
+
+    @Test fun `leading punctuation excluded from count`() {
+        // "(hi)" -> 2 alphanum at positions 1,2 -> alphaPositions[1] = pos 2 -> 'i'
+        val s = OrpCalculator.split("(hi)")
+        assertEquals('i', s.pivot)
+        assertEquals("(h", s.left)
+        assertEquals(")", s.right)
+    }
+
+    @Test fun `internal digit word`() {
+        // "v2word" -> 6 alphanum -> after-middle idx 3 -> 'o'
+        val s = OrpCalculator.split("v2word")
+        assertEquals('o', s.pivot)
+    }
+
+    @Test fun `pivotIndex on empty string returns zero`() {
+        assertEquals(0, OrpCalculator.pivotIndex(""))
+    }
+
+    @Test fun `split throws on empty`() {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException::class.java) {
+            OrpCalculator.split("")
+        }
+    }
 }

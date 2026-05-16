@@ -1,6 +1,7 @@
 package com.focusedreader.data
 
 import android.content.Context
+import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import com.focusedreader.ui.theme.ThemeMode
@@ -31,7 +32,10 @@ data class Settings(
 )
 
 @Singleton
-class SettingsRepository @Inject constructor(@ApplicationContext private val ctx: Context) {
+class SettingsRepository private constructor(private val store: DataStore<Preferences>) {
+
+    @Inject constructor(@ApplicationContext ctx: Context) : this(ctx.settingsStore)
+
     private object Keys {
         val WPM = intPreferencesKey("wpm")
         val STEP = intPreferencesKey("wpm_step")
@@ -50,9 +54,13 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val ctx
 
     companion object {
         const val DEFAULT_ORP_COLOR_ARGB: Int = 0xFFE53935.toInt() // material red 600
+
+        /** Test-only entry point — allows injecting a JVM-friendly DataStore. */
+        internal fun forTesting(store: DataStore<Preferences>): SettingsRepository =
+            SettingsRepository(store)
     }
 
-    val settings: Flow<Settings> = ctx.settingsStore.data.map { p ->
+    val settings: Flow<Settings> = store.data.map { p ->
         Settings(
             wpm = p[Keys.WPM] ?: 300,
             wpmStep = p[Keys.STEP] ?: 50,
@@ -86,10 +94,10 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val ctx
 
     /** Clears all persisted settings; the `settings` flow falls back to defaults. */
     suspend fun resetToDefaults() {
-        ctx.settingsStore.edit { it.clear() }
+        store.edit { it.clear() }
     }
 
     private suspend fun edit(block: (MutablePreferences) -> Unit) {
-        ctx.settingsStore.edit(block)
+        store.edit(block)
     }
 }
