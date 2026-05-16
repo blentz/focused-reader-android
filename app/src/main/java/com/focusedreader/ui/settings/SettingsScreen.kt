@@ -17,7 +17,7 @@ import com.focusedreader.data.ReaderFont
 import com.focusedreader.ui.theme.PaletteMode
 import com.focusedreader.ui.theme.ThemeMode
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 fun SettingsScreen(
     onCalibrateTts: () -> Unit,
@@ -67,7 +67,11 @@ fun SettingsScreen(
         Section("Display") {
             SwitchRow("Keep screen awake", current.keepScreenAwake) { vm.setKeepAwake(it) }
             Text("Font")
-            Row {
+            androidx.compose.foundation.layout.FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 ReaderFont.values().forEach { f ->
                     val label = when (f) {
                         ReaderFont.OPEN_DYSLEXIC -> "OpenDyslexic"
@@ -78,8 +82,7 @@ fun SettingsScreen(
                     FilterChip(
                         selected = current.font == f,
                         onClick = { vm.setFont(f) },
-                        label = { Text(label, fontFamily = com.focusedreader.ui.reader.resolveFontFamily(f)) },
-                        modifier = Modifier.padding(end = 4.dp)
+                        label = { Text(label, fontFamily = com.focusedreader.ui.reader.resolveFontFamily(f)) }
                     )
                 }
             }
