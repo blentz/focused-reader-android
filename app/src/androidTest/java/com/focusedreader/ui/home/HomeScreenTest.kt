@@ -13,8 +13,10 @@ class HomeScreenTest {
         rule.setContent {
             HomeScreenContent(
                 session = null,
+                a11yEnabled = true,
                 onRead = {},
                 onSettings = {},
+                onEnableA11y = {},
                 onPasteFromClipboard = {}
             )
         }

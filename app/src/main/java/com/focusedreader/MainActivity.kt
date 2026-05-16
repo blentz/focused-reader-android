@@ -1,9 +1,14 @@
 package com.focusedreader
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -25,8 +30,13 @@ class MainActivity : ComponentActivity() {
     @Inject lateinit var settings: SettingsRepository
     val keyEvents = MutableSharedFlow<Int>(extraBufferCapacity = 16) // KEYCODE_VOLUME_UP / DOWN
 
+    private val requestNotificationPermission = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { /* user choice — no follow-up needed for POC */ }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        maybeRequestNotificationPermission()
         setContent {
             val s by settings.settings.collectAsState(initial = null)
             val themeMode = s?.themeMode ?: ThemeMode.DARK
@@ -43,6 +53,13 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    private fun maybeRequestNotificationPermission() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        val perm = Manifest.permission.POST_NOTIFICATIONS
+        if (ContextCompat.checkSelfPermission(this, perm) == PackageManager.PERMISSION_GRANTED) return
+        requestNotificationPermission.launch(perm)
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
