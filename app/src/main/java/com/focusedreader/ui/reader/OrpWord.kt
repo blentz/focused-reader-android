@@ -25,8 +25,8 @@ fun OrpWord(
     orpColor: Color,
     fontSize: TextUnit,
     fontFamily: FontFamily,
-    pivotAnchorFraction: Float = 0.5f,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    pivotAnchorFraction: Float = 0.5f
 ) {
     if (word.isEmpty()) return
     val split = remember(word) { OrpCalculator.split(word) }
