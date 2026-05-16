@@ -25,12 +25,12 @@ val versionProps = Properties().apply {
 
 android {
     namespace = "com.focusedreader"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.focusedreader"
         minSdk = 30
-        targetSdk = 35
+        targetSdk = 36
         versionCode = versionProps.getProperty("versionCode").toInt()
         versionName = versionProps.getProperty("versionName")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -91,7 +91,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.jsoup)
-    implementation(libs.pdfbox.android)
     implementation(libs.androidx.navigation.compose)
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
