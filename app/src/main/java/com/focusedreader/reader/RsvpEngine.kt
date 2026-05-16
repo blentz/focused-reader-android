@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class RsvpEngine(private val dispatcher: CoroutineDispatcher) {
@@ -40,19 +41,27 @@ class RsvpEngine(private val dispatcher: CoroutineDispatcher) {
         job?.cancel()
         job = scope.launch {
             var first = emitFirst
-            while (current < tokens.size) {
+            while (current in tokens.indices) {
                 if (first) {
                     _index.emit(current)
                     first = false
                 }
-                delay(Wpm.tickMillis(wpmFlow.value))
-                current++
-                if (current < tokens.size) {
+                val wpm = wpmFlow.value
+                if (wpm == 0) {
+                    // Pause: wait for wpm to become non-zero.
+                    wpmFlow.first { it != 0 }
+                    continue
+                }
+                delay(Wpm.tickMillis(wpm))
+                val curWpm = wpmFlow.value
+                if (curWpm == 0) continue
+                current += Wpm.direction(curWpm)
+                if (current in tokens.indices) {
                     _index.emit(current)
                 }
             }
             // Natural completion (cancellation throws and skips this line).
-            if (current >= tokens.size && tokens.isNotEmpty()) {
+            if (tokens.isNotEmpty() && current !in tokens.indices) {
                 onComplete()
             }
         }
