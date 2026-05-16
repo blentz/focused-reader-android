@@ -5,6 +5,8 @@ import android.net.Uri
 import android.provider.Settings as AndroidSettings
 import android.widget.Toast
 import com.focusedreader.BuildConfig
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -34,6 +36,19 @@ fun SettingsScreen(
     val s by vm.settings.collectAsState()
     val ctx = LocalContext.current
     val current = s ?: return
+
+    val exportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/json")
+    ) { uri -> if (uri != null) vm.exportSessionTo(ctx, uri) }
+    val importLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri -> if (uri != null) vm.importSessionFrom(ctx, uri) }
+
+    LaunchedEffect(Unit) {
+        vm.messages.collect { msg ->
+            Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show()
+        }
+    }
 
     Box(Modifier.fillMaxSize()) {
     Column(
@@ -148,6 +163,15 @@ fun SettingsScreen(
                     }
                 )
             }
+            Spacer(Modifier.height(8.dp))
+            OutlinedButton(onClick = {
+                val name = "focused-reader-session-${System.currentTimeMillis()}.json"
+                exportLauncher.launch(name)
+            }) { Text("Export session") }
+            Spacer(Modifier.height(8.dp))
+            OutlinedButton(onClick = {
+                importLauncher.launch(arrayOf("application/json", "text/plain", "*/*"))
+            }) { Text("Import session") }
             if (showConfirm) {
                 AlertDialog(
                     onDismissRequest = { showConfirm = false },

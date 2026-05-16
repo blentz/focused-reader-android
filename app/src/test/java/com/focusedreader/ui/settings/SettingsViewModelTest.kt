@@ -3,6 +3,7 @@ package com.focusedreader.ui.settings
 import com.focusedreader.data.HapticMode
 import com.focusedreader.data.ReaderFont
 import com.focusedreader.data.Settings
+import com.focusedreader.data.SessionRepository
 import com.focusedreader.data.SettingsRepository
 import com.focusedreader.ui.theme.ThemeMode
 import io.mockk.coJustRun
@@ -46,12 +47,14 @@ class SettingsViewModelTest {
     )
 
     private lateinit var repo: SettingsRepository
+    private lateinit var sessions: SessionRepository
     private lateinit var flow: MutableStateFlow<Settings>
 
     @BeforeEach
     fun setUp() {
         Dispatchers.setMain(dispatcher)
         repo = mockk(relaxed = true)
+        sessions = mockk(relaxed = true)
         flow = MutableStateFlow(defaults)
         every { repo.settings } returns flow
         coJustRun { repo.setWpm(any()) }
@@ -71,7 +74,7 @@ class SettingsViewModelTest {
     @AfterEach
     fun tearDown() { Dispatchers.resetMain() }
 
-    private fun vm() = SettingsViewModel(repo)
+    private fun vm() = SettingsViewModel(repo, sessions)
 
     @Test
     fun `settings flow proxies repo`() = runTest(dispatcher) {
