@@ -9,6 +9,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.focusedreader.capture.ImportTextUseCase
+import com.focusedreader.data.Session
 import android.widget.Toast
 
 @Composable
@@ -19,7 +20,29 @@ fun HomeScreen(
 ) {
     val session by vm.session.collectAsState()
     val ctx = LocalContext.current
+    HomeScreenContent(
+        session = session,
+        onRead = onRead,
+        onSettings = onSettings,
+        onPasteFromClipboard = {
+            vm.importFromClipboard { result ->
+                val msg = when (result) {
+                    ImportTextUseCase.Result.Empty -> "Clipboard is empty"
+                    ImportTextUseCase.Result.Ok -> "Imported from clipboard"
+                }
+                Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show()
+            }
+        }
+    )
+}
 
+@Composable
+fun HomeScreenContent(
+    session: Session?,
+    onRead: () -> Unit,
+    onSettings: () -> Unit,
+    onPasteFromClipboard: () -> Unit
+) {
     Column(
         Modifier.fillMaxSize().padding(24.dp),
         verticalArrangement = Arrangement.Center,
@@ -35,15 +58,7 @@ fun HomeScreen(
         Spacer(Modifier.height(24.dp))
         Button(onClick = onRead, enabled = session != null) { Text("Read") }
         Spacer(Modifier.height(12.dp))
-        OutlinedButton(onClick = {
-            vm.importFromClipboard { result ->
-                val msg = when (result) {
-                    ImportTextUseCase.Result.Empty -> "Clipboard is empty"
-                    ImportTextUseCase.Result.Ok -> "Imported from clipboard"
-                }
-                Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show()
-            }
-        }) { Text("Paste from clipboard") }
+        OutlinedButton(onClick = onPasteFromClipboard) { Text("Paste from clipboard") }
         Spacer(Modifier.height(12.dp))
         OutlinedButton(onClick = onSettings) { Text("Settings") }
     }
