@@ -22,7 +22,7 @@ A focused, configurable RSVP (Rapid Serial Visual Presentation) speed-reader for
 - **Haptic feedback** — per-word or per-punctuation, intensity-scaled, USAGE_HARDWARE_FEEDBACK
 - **Per-session persistence** — single-slot Room store: resume where you left off
 - **Themes** — light/dark with selectable highlight colors
-- **Pause-mode scrubbing** — slider to jump to any word position
+- **Document preview** — Pause overlay shows a scrollable rendering of the source text; tap any line to jump there
 - **Volume keys** control speed live with an on-screen WPM HUD
 - **Keep-screen-awake** toggle for long sessions
 
@@ -58,7 +58,7 @@ Target: `minSdk 30`, `targetSdk 36`, Kotlin 2.0, Jetpack Compose, Hilt, Room, Da
 2. **Tap Read** to start playback in landscape
 3. **Volume Up / Volume Down** adjusts WPM by the configured step
 4. **Tap screen** to pause; **flip face-down** also pauses
-5. In Pause overlay: drag slider to jump to any word, **Resume** to keep reading, **Stop** to end
+5. In Pause overlay: scroll the document preview and tap any line to jump there, **Resume** to keep reading, **Stop** to end
 
 ## Settings
 

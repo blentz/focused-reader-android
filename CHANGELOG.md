@@ -2,6 +2,16 @@
 
 All notable changes to Focused Reader. Format roughly follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased]
+
+### Added
+- **Document preview** in Pause overlay — replaces the position slider with a scrollable rendering of the source text; tap a line to jump there. Auto-scrolls so the line nearest the viewport centre is the current word.
+
+### Fixed
+- Reader respects display cutout (camera hole / notch) when sizing words so glyphs are not clipped on devices with a punch-hole.
+- `seekTo` updates state synchronously, eliminating a race where resume could replay the pre-seek word.
+- Settings license label corrected from MIT to AGPL-3.0.
+
 ## [0.2.0] - 2026-05-16
 
 Major scope cut + dependency / toolchain modernization.
