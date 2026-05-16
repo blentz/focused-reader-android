@@ -2,8 +2,11 @@ package com.focusedreader.ui.settings
 
 import android.content.Intent
 import android.provider.Settings as AndroidSettings
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -57,6 +60,22 @@ fun SettingsScreen(
                     FilterChip(selected = current.themeMode == t, onClick = { vm.setTheme(t) }, label = { Text(t.name) }, modifier = Modifier.padding(end = 4.dp))
                 }
             }
+            Spacer(Modifier.height(8.dp))
+            Text("Highlight color")
+            Spacer(Modifier.height(4.dp))
+            androidx.compose.foundation.layout.FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                OrpColorSwatches.values.forEach { argb ->
+                    ColorSwatch(
+                        argb = argb,
+                        selected = current.orpColorArgb == argb,
+                        onClick = { vm.setOrpColor(argb) }
+                    )
+                }
+            }
         }
         Section("Display") {
             SwitchRow("Keep screen awake", current.keepScreenAwake) { vm.setKeepAwake(it) }
@@ -100,6 +119,35 @@ private fun Section(title: String, content: @Composable ColumnScope.() -> Unit) 
 private fun SliderRow(label: String, value: Float, range: ClosedFloatingPointRange<Float>, steps: Int, onChange: (Float) -> Unit) {
     Text(label)
     Slider(value = value, onValueChange = onChange, valueRange = range, steps = steps)
+}
+
+object OrpColorSwatches {
+    val values: List<Int> = listOf(
+        0xFFE53935.toInt(), // red
+        0xFFFB8C00.toInt(), // orange
+        0xFFFDD835.toInt(), // yellow
+        0xFF43A047.toInt(), // green
+        0xFF00ACC1.toInt(), // cyan
+        0xFF1E88E5.toInt(), // blue
+        0xFF8E24AA.toInt(), // purple
+        0xFFEC407A.toInt(), // pink
+    )
+}
+
+@Composable
+private fun ColorSwatch(argb: Int, selected: Boolean, onClick: () -> Unit) {
+    val color = androidx.compose.ui.graphics.Color(argb)
+    val border = if (selected) {
+        BorderStroke(3.dp, MaterialTheme.colorScheme.onSurface)
+    } else {
+        BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+    }
+    Surface(
+        modifier = Modifier.size(40.dp).clickable(onClick = onClick),
+        shape = CircleShape,
+        color = color,
+        border = border
+    ) {}
 }
 
 @Composable

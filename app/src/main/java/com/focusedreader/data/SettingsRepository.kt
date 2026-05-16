@@ -25,7 +25,8 @@ data class Settings(
     val ttsWpmCap: Int,
     val themeMode: ThemeMode,
     val keepScreenAwake: Boolean,
-    val font: ReaderFont
+    val font: ReaderFont,
+    val orpColorArgb: Int
 )
 
 @Singleton
@@ -42,6 +43,11 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val ctx
         val THEME = stringPreferencesKey("theme")
         val KEEP_AWAKE = booleanPreferencesKey("keep_awake")
         val FONT = stringPreferencesKey("font")
+        val ORP_COLOR = intPreferencesKey("orp_color_argb")
+    }
+
+    companion object {
+        const val DEFAULT_ORP_COLOR_ARGB: Int = 0xFFE53935.toInt() // material red 600
     }
 
     val settings: Flow<Settings> = ctx.settingsStore.data.map { p ->
@@ -57,6 +63,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val ctx
             themeMode = ThemeMode.valueOf(p[Keys.THEME] ?: ThemeMode.AUTO.name),
             keepScreenAwake = p[Keys.KEEP_AWAKE] ?: true,
             font = ReaderFont.valueOf(p[Keys.FONT] ?: ReaderFont.LEXEND.name),
+            orpColorArgb = p[Keys.ORP_COLOR] ?: DEFAULT_ORP_COLOR_ARGB,
         )
     }
 
@@ -71,6 +78,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val ctx
     suspend fun setTheme(v: ThemeMode) = edit { it[Keys.THEME] = v.name }
     suspend fun setKeepAwake(v: Boolean) = edit { it[Keys.KEEP_AWAKE] = v }
     suspend fun setFont(v: ReaderFont) = edit { it[Keys.FONT] = v.name }
+    suspend fun setOrpColor(argb: Int) = edit { it[Keys.ORP_COLOR] = argb }
 
     private suspend fun edit(block: (MutablePreferences) -> Unit) {
         ctx.settingsStore.edit(block)

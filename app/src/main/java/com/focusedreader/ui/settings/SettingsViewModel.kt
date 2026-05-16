@@ -28,4 +28,5 @@ class SettingsViewModel @Inject constructor(private val repo: SettingsRepository
     fun setTheme(t: ThemeMode) = viewModelScope.launch { repo.setTheme(t) }
     fun setKeepAwake(v: Boolean) = viewModelScope.launch { repo.setKeepAwake(v) }
     fun setFont(v: ReaderFont) = viewModelScope.launch { repo.setFont(v) }
+    fun setOrpColor(argb: Int) = viewModelScope.launch { repo.setOrpColor(argb) }
 }

@@ -43,9 +43,12 @@ class MainActivity : ComponentActivity() {
             val themeMode = s?.themeMode ?: ThemeMode.AUTO
             val systemDark = isSystemInDarkTheme()
             val effective = effectiveThemeMode(themeMode, systemDark)
+            val basePalette = palette(effective)
+            val orpOverride = s?.orpColorArgb?.let { androidx.compose.ui.graphics.Color(it) }
+            val finalPalette = if (orpOverride != null) basePalette.copy(orp = orpOverride) else basePalette
             FocusedReaderTheme(
                 darkTheme = effective == ThemeMode.DARK,
-                readerPalette = palette(effective)
+                readerPalette = finalPalette
             ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
