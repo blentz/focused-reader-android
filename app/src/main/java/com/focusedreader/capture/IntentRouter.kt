@@ -7,7 +7,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Singleton bridge from MainActivity intents (app shortcuts, NFC) to Compose UI.
+ * Singleton bridge from MainActivity intents (app shortcuts) to Compose UI.
  * MainActivity emits action strings; HomeScreen collects and acts.
  */
 @Singleton
@@ -24,6 +24,4 @@ sealed class RouterEvent {
     data object PasteClipboard : RouterEvent()
     data object Resume : RouterEvent()
     data object OpenFile : RouterEvent()
-    /** Text or URL captured from an NFC NDEF tag. */
-    data class ImportText(val text: String) : RouterEvent()
 }

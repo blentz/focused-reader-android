@@ -58,18 +58,8 @@ class IntentRouterTest {
         val a = async { router.actions.first() }
         val b = async { router.actions.first() }
         kotlinx.coroutines.yield()
-        router.emit(RouterEvent.ImportText("hello"))
-        assertEquals(RouterEvent.ImportText("hello"), a.await())
-        assertEquals(RouterEvent.ImportText("hello"), b.await())
-    }
-
-    @Test
-    fun `ImportText carries payload`() = runTest {
-        val router = IntentRouter()
-        val collector = async { router.actions.first() }
-        kotlinx.coroutines.yield()
-        router.emit(RouterEvent.ImportText("payload"))
-        val ev = collector.await()
-        assertEquals(RouterEvent.ImportText("payload"), ev)
+        router.emit(RouterEvent.PasteClipboard)
+        assertEquals(RouterEvent.PasteClipboard, a.await())
+        assertEquals(RouterEvent.PasteClipboard, b.await())
     }
 }
