@@ -1,8 +1,10 @@
 package com.focusedreader.ui.settings
 
 import android.content.Intent
+import android.net.Uri
 import android.provider.Settings as AndroidSettings
 import android.widget.Toast
+import com.focusedreader.BuildConfig
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -164,6 +166,29 @@ fun SettingsScreen(
                 )
             }
         }
+        Section("About") {
+            Text(
+                "Focused Reader ${BuildConfig.VERSION_NAME} (build ${BuildConfig.VERSION_CODE})",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Spacer(Modifier.height(8.dp))
+            AboutLink(label = "Source on GitHub", url = "https://github.com/blentz/focused-reader-android")
+            AboutLink(label = "Privacy policy", url = "https://github.com/blentz/focused-reader-android/blob/main/docs/PRIVACY.md")
+            AboutLink(label = "License (MIT)", url = "https://github.com/blentz/focused-reader-android/blob/main/LICENSE")
+            Spacer(Modifier.height(12.dp))
+            Text(
+                "Attributions",
+                style = MaterialTheme.typography.labelLarge
+            )
+            Text(
+                "Fonts: OpenDyslexic (OFL), Lexend (OFL), Atkinson Hyperlegible (OFL), Inclusive Sans (OFL).",
+                style = MaterialTheme.typography.bodySmall
+            )
+            Text(
+                "Libraries: Jetpack Compose, Hilt, Room, Jsoup, PDFBox-Android.",
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
     }
         FloatingActionButton(
             onClick = onBack,
@@ -226,6 +251,25 @@ private fun ColorSwatch(argb: Int, selected: Boolean, onClick: () -> Unit) {
         color = color,
         border = border
     ) {}
+}
+
+@Composable
+private fun AboutLink(label: String, url: String) {
+    val ctx = LocalContext.current
+    Text(
+        label,
+        color = MaterialTheme.colorScheme.primary,
+        style = MaterialTheme.typography.bodyMedium,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                ctx.startActivity(
+                    Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                )
+            }
+            .padding(vertical = 6.dp)
+    )
 }
 
 @Composable
