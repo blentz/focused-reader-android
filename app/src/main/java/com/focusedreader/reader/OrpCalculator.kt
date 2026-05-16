@@ -1,13 +1,7 @@
 package com.focusedreader.reader
 
 object OrpCalculator {
-    fun pivotIndex(length: Int): Int = when {
-        length <= 1 -> 0
-        length <= 5 -> 1
-        length <= 9 -> 2
-        length <= 13 -> 3
-        else -> 4
-    }
+    fun pivotIndex(length: Int): Int = if (length <= 1) 0 else length / 2
 
     data class Split(val left: String, val pivot: Char, val right: String)
 

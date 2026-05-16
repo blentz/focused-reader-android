@@ -7,15 +7,17 @@ import org.junit.jupiter.api.TestFactory
 class OrpCalculatorTest {
     private val cases = listOf(
         1 to 0,
-        2 to 1, 3 to 1, 4 to 1, 5 to 1,
-        6 to 2, 7 to 2, 8 to 2, 9 to 2,
-        10 to 3, 11 to 3, 12 to 3, 13 to 3,
-        14 to 4, 20 to 4, 50 to 4
+        2 to 1, 3 to 1,
+        4 to 2, 5 to 2,
+        6 to 3, 7 to 3,
+        8 to 4, 9 to 4,
+        10 to 5, 13 to 6,
+        14 to 7, 28 to 14, 50 to 25
     )
 
     @TestFactory
-    fun `pivot index per length bucket`() = cases.map { (len, expected) ->
-        DynamicTest.dynamicTest("len=$len → $expected") {
+    fun `pivot index is length divided by two`() = cases.map { (len, expected) ->
+        DynamicTest.dynamicTest("len=$len -> $expected") {
             assertEquals(expected, OrpCalculator.pivotIndex(len))
         }
     }
@@ -23,13 +25,24 @@ class OrpCalculatorTest {
     @org.junit.jupiter.api.Test
     fun `split returns left pivot right`() {
         val s = OrpCalculator.split("reading")
-        assertEquals("re", s.left)
-        assertEquals('a', s.pivot)
-        assertEquals("ding", s.right)
+        assertEquals("rea", s.left)
+        assertEquals('d', s.pivot)
+        assertEquals("ing", s.right)
     }
+
     @org.junit.jupiter.api.Test
     fun `split single char`() {
         val s = OrpCalculator.split("a")
         assertEquals("", s.left); assertEquals('a', s.pivot); assertEquals("", s.right)
+    }
+
+    @org.junit.jupiter.api.Test
+    fun `split twenty-eight char word picks true middle`() {
+        val word = "antidisestablishmentarianism"
+        val s = OrpCalculator.split(word)
+        assertEquals(14, OrpCalculator.pivotIndex(word.length))
+        assertEquals('m', s.pivot)
+        assertEquals("antidisestablish", s.left)
+        assertEquals("entarianism", s.right)
     }
 }
