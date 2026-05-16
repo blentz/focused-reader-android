@@ -33,9 +33,9 @@ fun ReaderScreen(
         onDispose { activity?.requestedOrientation = prior ?: ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
     }
 
-    LaunchedEffect(Unit) {
+    val step by vm.wpmStep.collectAsState()
+    LaunchedEffect(step) {
         val activity = ctx as? com.focusedreader.MainActivity ?: return@LaunchedEffect
-        val step = 50 // will be replaced by settings in Task 19
         activity.keyEvents.collect { code ->
             when (code) {
                 android.view.KeyEvent.KEYCODE_VOLUME_UP -> vm.bumpWpm(+step)

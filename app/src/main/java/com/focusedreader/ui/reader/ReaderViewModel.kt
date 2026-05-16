@@ -16,7 +16,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -33,6 +36,11 @@ class ReaderViewModel @Inject constructor(
     private val engine = RsvpEngine(Dispatchers.Default)
     private val _state = MutableStateFlow<ReaderState>(ReaderState.Idle)
     val state: StateFlow<ReaderState> = _state
+
+    /** WPM step for volume key adjustments, sourced from settings. */
+    val wpmStep: StateFlow<Int> = settings.settings
+        .map { it.wpmStep }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, 50)
 
     private var tokens: List<String> = emptyList()
     private var saveCounter = 0
