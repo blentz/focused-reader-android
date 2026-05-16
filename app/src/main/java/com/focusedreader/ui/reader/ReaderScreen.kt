@@ -97,18 +97,34 @@ fun ReaderScreen(
         ReaderState.Idle -> emptyList()
     }
 
+    // Account for display cutout (camera hole on Pixel 10) so the centred
+    // word never disappears behind the lens. In landscape the cutout is on
+    // one edge; padding by displayCutout insets shrinks the usable rect.
+    val cutoutInsets = androidx.compose.foundation.layout.WindowInsets.displayCutout
+    val leftInsetPx = cutoutInsets.getLeft(density, androidx.compose.ui.unit.LayoutDirection.Ltr)
+    val rightInsetPx = cutoutInsets.getRight(density, androidx.compose.ui.unit.LayoutDirection.Ltr)
+    val topInsetPx = cutoutInsets.getTop(density)
+    val bottomInsetPx = cutoutInsets.getBottom(density)
+    val usableWidthPx = with(density) {
+        (configuration.screenWidthDp.dp.toPx() - leftInsetPx - rightInsetPx).coerceAtLeast(1f)
+    }
+    val usableHeightPx = with(density) {
+        (configuration.screenHeightDp.dp.toPx() - topInsetPx - bottomInsetPx).coerceAtLeast(1f)
+    }
+
     // Per-word fit-to-width sizing: each word's pivot is anchored at screen
     // centre, so the wider of left-of-pivot or right-of-pivot dictates the
     // scale. A small height cap prevents single-char words from blowing up
     // beyond the screen vertically.
-    val maxHeightPx = with(density) { (configuration.screenHeightDp.dp * 0.7f).toPx() }
-    val leftBudgetPx = with(density) { (configuration.screenWidthDp.dp * 0.475f).toPx() }
+    val maxHeightPx = usableHeightPx * 0.7f
+    val leftBudgetPx = usableWidthPx * 0.475f
     val rightBudgetPx = leftBudgetPx
 
     Box(
         Modifier
             .fillMaxSize()
             .background(palette.background)
+            .windowInsetsPadding(cutoutInsets)
             .semantics {
                 contentDescription = when (state) {
                     is ReaderState.Reading -> "Reading. Tap to pause."
