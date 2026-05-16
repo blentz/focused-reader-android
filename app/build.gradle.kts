@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -5,6 +7,15 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
 }
+
+// Release signing pulled from keystore.properties (gitignored) or env vars.
+// Env vars take precedence so CI can sign without a checked-in file.
+val keystoreProps = Properties().apply {
+    val f = rootProject.file("keystore.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
+}
+fun prop(key: String): String? = System.getenv(key)?.takeIf { it.isNotBlank() }
+    ?: keystoreProps.getProperty(key)?.takeIf { it.isNotBlank() }
 
 android {
     namespace = "com.focusedreader"
@@ -19,10 +30,29 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            val storeFilePath = prop("KEYSTORE_FILE") ?: prop("storeFile")
+            if (storeFilePath != null) {
+                storeFile = file(storeFilePath)
+                storePassword = prop("KEYSTORE_PASSWORD") ?: prop("storePassword")
+                keyAlias = prop("KEY_ALIAS") ?: prop("keyAlias")
+                keyPassword = prop("KEY_PASSWORD") ?: prop("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            // Apply release signing only if a keystore is configured; otherwise
+            // gradle bundleRelease will fail with a clear message rather than
+            // silently producing an unsigned artifact.
+            val cfg = signingConfigs.findByName("release")
+            if (cfg?.storeFile != null && cfg.storeFile?.exists() == true) {
+                signingConfig = cfg
+            }
         }
         debug {
             isMinifyEnabled = false
