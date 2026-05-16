@@ -54,6 +54,18 @@ bundletool build-apks --bundle=app-release.aab --output=app-release.apks --mode=
 bundletool install-apks --apks=app-release.apks
 ```
 
+## Cutting a release
+
+1. Run `./bump-version.sh minor` (or major/patch)
+2. Push: `git push --follow-tags`
+3. GitHub Actions Release workflow builds the signed AAB and attaches it to the GitHub release automatically
+
+Required GitHub repo secrets for the Release workflow:
+- `KEYSTORE_BASE64` — `base64 -w0 release.jks`
+- `KEYSTORE_PASSWORD`
+- `KEY_ALIAS`
+- `KEY_PASSWORD`
+
 ## 6. Upload to Play Console
 
 Internal testing track first. Submit Permissions Declaration for the Accessibility Service citing `docs/A11Y_PURPOSE.md`. Privacy policy URL: the raw `docs/PRIVACY.md` on the GitHub repo.

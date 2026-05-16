@@ -17,6 +17,12 @@ val keystoreProps = Properties().apply {
 fun prop(key: String): String? = System.getenv(key)?.takeIf { it.isNotBlank() }
     ?: keystoreProps.getProperty(key)?.takeIf { it.isNotBlank() }
 
+// Version info lives in root-level version.properties so bump-version.sh
+// can update it without touching this build file.
+val versionProps = Properties().apply {
+    rootProject.file("version.properties").inputStream().use { load(it) }
+}
+
 android {
     namespace = "com.focusedreader"
     compileSdk = 35
@@ -25,8 +31,8 @@ android {
         applicationId = "com.focusedreader"
         minSdk = 30
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = versionProps.getProperty("versionCode").toInt()
+        versionName = versionProps.getProperty("versionName")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
