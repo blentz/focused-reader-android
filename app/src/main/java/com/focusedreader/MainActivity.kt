@@ -4,9 +4,18 @@ import android.os.Bundle
 import android.view.KeyEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import com.focusedreader.data.SettingsRepository
 import com.focusedreader.nav.FocusedReaderNavGraph
 import com.focusedreader.ui.theme.FocusedReaderTheme
+import com.focusedreader.ui.theme.PaletteMode
+import com.focusedreader.ui.theme.ThemeMode
+import com.focusedreader.ui.theme.palette
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -19,8 +28,19 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            FocusedReaderTheme {
-                FocusedReaderNavGraph()
+            val s by settings.settings.collectAsState(initial = null)
+            val themeMode = s?.themeMode ?: ThemeMode.DARK
+            val paletteMode = s?.paletteMode ?: PaletteMode.SOFT
+            FocusedReaderTheme(
+                darkTheme = themeMode == ThemeMode.DARK,
+                readerPalette = palette(themeMode, paletteMode)
+            ) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    FocusedReaderNavGraph()
+                }
             }
         }
     }

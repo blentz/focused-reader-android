@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.TextUnit
 import com.focusedreader.reader.OrpCalculator
 
@@ -36,7 +37,7 @@ fun OrpWord(
                 Text(split.right, color = wordColor, style = baseStyle, maxLines = 1)
             }
         ) { measurables, constraints ->
-            val unbounded = constraints.copy(minWidth = 0, maxWidth = Int.MAX_VALUE / 4)
+            val unbounded = constraints.copy(minWidth = 0, maxWidth = Constraints.Infinity)
             val leftPlaceable = measurables[0].measure(unbounded)
             val pivotPlaceable = measurables[1].measure(unbounded)
             val rightPlaceable = measurables[2].measure(unbounded)
