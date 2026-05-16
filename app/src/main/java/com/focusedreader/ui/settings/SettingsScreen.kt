@@ -196,7 +196,7 @@ fun SettingsScreen(
             Spacer(Modifier.height(8.dp))
             AboutLink(label = "Source on GitHub", url = "https://github.com/blentz/focused-reader-android")
             AboutLink(label = "Privacy policy", url = "https://github.com/blentz/focused-reader-android/blob/main/docs/PRIVACY.md")
-            AboutLink(label = "License (MIT)", url = "https://github.com/blentz/focused-reader-android/blob/main/LICENSE")
+            AboutLink(label = "License (AGPL-3.0)", url = "https://github.com/blentz/focused-reader-android/blob/main/LICENSE")
             Spacer(Modifier.height(12.dp))
             Text(
                 "Attributions",
