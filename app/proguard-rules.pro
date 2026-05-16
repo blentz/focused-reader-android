@@ -37,16 +37,6 @@
 -keepclassmembers class org.jsoup.** { *; }
 -dontwarn org.jsoup.**
 
-# ---- PDFBox-android ----
--keep class com.tom_roush.pdfbox.** { *; }
--keepclassmembers class com.tom_roush.pdfbox.** { *; }
--dontwarn com.tom_roush.pdfbox.**
-# Optional JPEG2000 codec we don't ship (drop the warning R8 emits).
--dontwarn com.gemalto.jp2.JP2Decoder
-# Apache fontbox/commons sub-deps referenced via reflection.
--dontwarn org.apache.**
--dontwarn javax.xml.**
-
 # ---- DataStore Preferences ----
 -dontwarn androidx.datastore.preferences.**
 

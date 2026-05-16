@@ -3,9 +3,6 @@ package com.focusedreader.capture
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
-import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
-import com.tom_roush.pdfbox.pdmodel.PDDocument
-import com.tom_roush.pdfbox.text.PDFTextStripper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.InputStream
@@ -25,15 +22,9 @@ class FilePicker @Inject constructor() {
         val size = fileSize(ctx, uri)
         if (size > MAX_BYTES) return@withContext Result.TooLarge(size)
 
-        val mime = ctx.contentResolver.getType(uri)
         val text = runCatching {
             ctx.contentResolver.openInputStream(uri)?.use { stream ->
-                if (mime == "application/pdf") {
-                    PDFBoxResourceLoader.init(ctx.applicationContext)
-                    PDDocument.load(stream).use { doc -> PDFTextStripper().getText(doc) }
-                } else {
-                    readTextFromStream(stream)
-                }
+                readTextFromStream(stream)
             }
         }.getOrNull()
         if (text.isNullOrBlank()) Result.ReadFailed else Result.Ok(text)
