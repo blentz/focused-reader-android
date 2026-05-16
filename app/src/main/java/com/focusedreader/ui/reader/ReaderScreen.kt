@@ -291,13 +291,16 @@ private fun DocumentPreview(
     )
     val scope = rememberCoroutineScope()
 
-    // Map scroll position → cursor. Center line of viewport = active line.
+    // Map scroll position → cursor. Active line = whichever line is closest
+    // to the vertical centre of the viewport. Picking by index-of-visible
+    // (size/2) would mean the first/last few lines could never reach centre.
     val activeLine by remember {
         androidx.compose.runtime.derivedStateOf {
-            val first = listState.firstVisibleItemIndex
-            val visible = listState.layoutInfo.visibleItemsInfo
-            val mid = visible.getOrNull(visible.size / 2)?.index ?: first
-            mid.coerceIn(0, lines.lastIndex)
+            val info = listState.layoutInfo
+            val viewportCentre = (info.viewportStartOffset + info.viewportEndOffset) / 2
+            info.visibleItemsInfo.minByOrNull {
+                kotlin.math.abs((it.offset + it.size / 2) - viewportCentre)
+            }?.index?.coerceIn(0, lines.lastIndex) ?: 0
         }
     }
     LaunchedEffect(activeLine) {
@@ -321,7 +324,9 @@ private fun DocumentPreview(
         ) {
             androidx.compose.foundation.lazy.LazyColumn(
                 state = listState,
-                contentPadding = PaddingValues(vertical = 72.dp),
+                // Half the viewport height (~90dp) so the first and last lines
+                // can be scrolled all the way to the centre reticle.
+                contentPadding = PaddingValues(vertical = 90.dp),
                 modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp)
             ) {
                 items(lines.size) { idx ->
