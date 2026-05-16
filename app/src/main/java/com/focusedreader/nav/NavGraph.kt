@@ -18,7 +18,12 @@ fun FocusedReaderNavGraph(nav: NavHostController = rememberNavController()) {
                 onSettings = { nav.navigate(Routes.SETTINGS) }
             )
         }
-        composable(Routes.READER) { ReaderScreen() }
+        composable(Routes.READER) {
+            com.focusedreader.ui.reader.ReaderScreen(
+                onExit = { nav.popBackStack() },
+                onSettings = { nav.navigate(Routes.SETTINGS) }
+            )
+        }
         composable(Routes.SETTINGS) { SettingsScreen() }
     }
 }
