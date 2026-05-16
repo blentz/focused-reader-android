@@ -10,7 +10,7 @@ class SourceConverter {
     @TypeConverter fun fromString(s: String): ImportSource = ImportSource.valueOf(s)
 }
 
-@Database(entities = [Session::class], version = 1, exportSchema = false)
+@Database(entities = [Session::class], version = 1, exportSchema = true)
 @TypeConverters(SourceConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun sessions(): SessionDao

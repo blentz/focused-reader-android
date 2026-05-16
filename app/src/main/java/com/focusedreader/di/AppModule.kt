@@ -17,7 +17,11 @@ object AppModule {
     @Provides @Singleton
     fun provideDb(@ApplicationContext ctx: Context): AppDatabase =
         Room.databaseBuilder(ctx, AppDatabase::class.java, "focused-reader.db")
-            .fallbackToDestructiveMigration()
+            // Migrations are added here as the schema evolves. Destructive
+            // fallback intentionally NOT enabled — losing reading position
+            // on every schema bump would be hostile. Add real Migration(N, N+1)
+            // when needed and write a paired migration test under
+            // app/src/androidTest/.../MigrationsTest.kt.
             .build()
 
     @Provides

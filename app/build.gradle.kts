@@ -65,6 +65,11 @@ android {
     }
     kotlinOptions { jvmTarget = "17" }
     buildFeatures { compose = true }
+
+    // Export Room schemas for migration testing.
+    ksp {
+        arg("room.schemaLocation", "$projectDir/schemas")
+    }
     testOptions {
         unitTests.all { it.useJUnitPlatform() }
     }
