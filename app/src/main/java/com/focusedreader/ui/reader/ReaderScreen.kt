@@ -79,17 +79,16 @@ fun ReaderScreen(
         ReaderState.Idle -> emptyList()
     }
 
-    val fontSize: TextUnit = remember(tokens, s.font, configuration.screenWidthDp) {
+    val fontSize: TextUnit = remember(tokens, s.font, configuration.screenWidthDp, configuration.screenHeightDp) {
         if (tokens.isEmpty()) {
             96.sp
         } else {
-            val widest = tokens.maxByOrNull { it.length } ?: ""
             val refSize = 100.sp
             val refStyle = TextStyle(fontSize = refSize, fontFamily = fontFamily, fontWeight = FontWeight.Medium)
-            val measured = measurer.measure(widest, refStyle, maxLines = 1)
-            val widthAtRef = measured.size.width.coerceAtLeast(1)
-            val targetPx = with(density) { (configuration.screenWidthDp.dp * 0.85f).toPx() }
-            val scale = (targetPx / widthAtRef).coerceIn(0.5f, 3.0f)
+            val measured = measurer.measure("Hg", refStyle, maxLines = 1)
+            val heightAtRef = measured.size.height.coerceAtLeast(1)
+            val targetHeightPx = with(density) { (configuration.screenHeightDp.dp * 0.6f).toPx() }
+            val scale = (targetHeightPx / heightAtRef).coerceIn(1.0f, 12.0f)
             (refSize.value * scale).sp
         }
     }
