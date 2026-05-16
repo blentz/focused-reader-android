@@ -13,6 +13,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -99,6 +103,15 @@ fun ReaderScreen(
         Modifier
             .fillMaxSize()
             .background(palette.background)
+            .semantics {
+                contentDescription = when (state) {
+                    is ReaderState.Reading -> "Reading. Tap to pause."
+                    is ReaderState.Paused -> "Paused."
+                    is ReaderState.Resuming -> "Resuming. Tap to pause."
+                    ReaderState.Idle -> "Reader idle."
+                }
+                role = Role.Button
+            }
             .clickable { vm.togglePause() }
     ) {
         when (val sst = state) {
@@ -223,7 +236,12 @@ private fun PauseOverlay(
             onValueChange = { scrub = it },
             onValueChangeFinished = { onSeek(scrub.toInt()) },
             valueRange = 0f..maxIdx.coerceAtLeast(0f),
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp)
+                .semantics {
+                    contentDescription = "Reading position scrubber, word ${scrub.toInt()} of $total"
+                }
         )
         Spacer(Modifier.height(16.dp))
         Button(onClick = onResume) { Text("Resume") }

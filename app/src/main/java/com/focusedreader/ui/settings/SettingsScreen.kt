@@ -20,6 +20,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.focusedreader.data.HapticMode
@@ -229,6 +233,10 @@ private fun Section(title: String, content: @Composable ColumnScope.() -> Unit) 
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .semantics(mergeDescendants = true) {
+                contentDescription = if (expanded) "$title section, expanded" else "$title section, collapsed"
+                role = Role.Button
+            }
             .clickable { expanded = !expanded }
             .padding(top = 16.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -259,6 +267,16 @@ object OrpColorSwatches {
         0xFF8E24AA.toInt(), // purple
         0xFFEC407A.toInt(), // pink
     )
+    val names: Map<Int, String> = mapOf(
+        0xFFE53935.toInt() to "red",
+        0xFFFB8C00.toInt() to "orange",
+        0xFFFDD835.toInt() to "yellow",
+        0xFF43A047.toInt() to "green",
+        0xFF00ACC1.toInt() to "cyan",
+        0xFF1E88E5.toInt() to "blue",
+        0xFF8E24AA.toInt() to "purple",
+        0xFFEC407A.toInt() to "pink",
+    )
 }
 
 @Composable
@@ -269,8 +287,16 @@ private fun ColorSwatch(argb: Int, selected: Boolean, onClick: () -> Unit) {
     } else {
         BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
     }
+    val name = OrpColorSwatches.names[argb] ?: "color"
+    val desc = if (selected) "Highlight color $name, selected" else "Highlight color $name"
     Surface(
-        modifier = Modifier.size(40.dp).clickable(onClick = onClick),
+        modifier = Modifier
+            .size(40.dp)
+            .semantics {
+                contentDescription = desc
+                role = Role.RadioButton
+            }
+            .clickable(onClick = onClick),
         shape = CircleShape,
         color = color,
         border = border
