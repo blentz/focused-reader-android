@@ -2,6 +2,7 @@ package com.focusedreader.ui.reader
 
 import android.content.pm.ActivityInfo
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -34,6 +35,12 @@ fun ReaderScreen(
     val ctx = LocalContext.current
     val rs by vm.readerSettings.collectAsState()
     val s = rs ?: return
+
+    // Mid-session back press: pause instead of exit. From Paused/Idle, fall
+    // through to default back nav (which exits the reader).
+    BackHandler(enabled = state is ReaderState.Reading || state is ReaderState.Resuming) {
+        vm.togglePause()
+    }
 
     DisposableEffect(Unit) {
         val activity = ctx as? ComponentActivity

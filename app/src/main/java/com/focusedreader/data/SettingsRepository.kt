@@ -26,7 +26,8 @@ data class Settings(
     val themeMode: ThemeMode,
     val keepScreenAwake: Boolean,
     val font: ReaderFont,
-    val orpColorArgb: Int
+    val orpColorArgb: Int,
+    val hasSeenOnboarding: Boolean
 )
 
 @Singleton
@@ -44,6 +45,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val ctx
         val KEEP_AWAKE = booleanPreferencesKey("keep_awake")
         val FONT = stringPreferencesKey("font")
         val ORP_COLOR = intPreferencesKey("orp_color_argb")
+        val ONBOARDING_SEEN = booleanPreferencesKey("onboarding_seen")
     }
 
     companion object {
@@ -64,6 +66,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val ctx
             keepScreenAwake = p[Keys.KEEP_AWAKE] ?: true,
             font = ReaderFont.valueOf(p[Keys.FONT] ?: ReaderFont.LEXEND.name),
             orpColorArgb = p[Keys.ORP_COLOR] ?: DEFAULT_ORP_COLOR_ARGB,
+            hasSeenOnboarding = p[Keys.ONBOARDING_SEEN] ?: false,
         )
     }
 
@@ -79,6 +82,12 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val ctx
     suspend fun setKeepAwake(v: Boolean) = edit { it[Keys.KEEP_AWAKE] = v }
     suspend fun setFont(v: ReaderFont) = edit { it[Keys.FONT] = v.name }
     suspend fun setOrpColor(argb: Int) = edit { it[Keys.ORP_COLOR] = argb }
+    suspend fun setOnboardingSeen(v: Boolean) = edit { it[Keys.ONBOARDING_SEEN] = v }
+
+    /** Clears all persisted settings; the `settings` flow falls back to defaults. */
+    suspend fun resetToDefaults() {
+        ctx.settingsStore.edit { it.clear() }
+    }
 
     private suspend fun edit(block: (MutablePreferences) -> Unit) {
         ctx.settingsStore.edit(block)

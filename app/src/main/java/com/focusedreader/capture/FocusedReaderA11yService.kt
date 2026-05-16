@@ -1,10 +1,14 @@
 package com.focusedreader.capture
 
 import android.accessibilityservice.AccessibilityService
-import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
+import android.widget.Toast
+import com.focusedreader.data.HapticMode
 import com.focusedreader.data.ImportSource
+import com.focusedreader.reader.HapticController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -16,8 +20,10 @@ import javax.inject.Inject
 class FocusedReaderA11yService : AccessibilityService() {
 
     @Inject lateinit var importer: ImportTextUseCase
+    @Inject lateinit var haptic: HapticController
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val mainHandler by lazy { Handler(Looper.getMainLooper()) }
     private var capturePending = false
 
     companion object {
@@ -36,6 +42,23 @@ class FocusedReaderA11yService : AccessibilityService() {
 
     fun requestCapture() {
         val text = collectText(rootInActiveWindow)
+        val charCount = text.length
+        if (text.isNotBlank()) {
+            // Give immediate physical feedback so the user knows the tap worked
+            // without waiting for the import pipeline to finish.
+            haptic.tick(word = "", mode = HapticMode.PER_WORD, intensityPct = 30)
+            mainHandler.post {
+                Toast.makeText(
+                    this,
+                    "Captured ${"%,d".format(charCount)} chars",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        } else {
+            mainHandler.post {
+                Toast.makeText(this, "No text found on screen", Toast.LENGTH_SHORT).show()
+            }
+        }
         scope.launch { importer(text, ImportSource.A11Y) }
     }
 

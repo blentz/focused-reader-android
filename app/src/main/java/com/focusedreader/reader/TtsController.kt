@@ -16,7 +16,15 @@ class TtsController @Inject constructor(
     @Volatile private var ready: Boolean = false
 
     suspend fun init(): Boolean {
-        if (ready) return true
+        if (ready && tts != null) return true
+        // Dispose any prior instance before constructing a new one to avoid leaks
+        // when callers re-init after a settings toggle.
+        try {
+            tts?.stop()
+            tts?.shutdown()
+        } catch (_: Throwable) {}
+        tts = null
+        ready = false
         return suspendCancellableCoroutine { cont ->
             val engine = TextToSpeech(ctx) { status ->
                 ready = status == TextToSpeech.SUCCESS

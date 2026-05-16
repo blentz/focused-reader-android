@@ -2,6 +2,7 @@ package com.focusedreader.ui.settings
 
 import android.content.Intent
 import android.provider.Settings as AndroidSettings
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -105,13 +106,46 @@ fun SettingsScreen(
                 ctx.startActivity(Intent(AndroidSettings.ACTION_ACCESSIBILITY_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             }) { Text("Open Accessibility Settings") }
         }
+        Section("Maintenance") {
+            var showConfirm by remember { mutableStateOf(false) }
+            OutlinedButton(onClick = { showConfirm = true }) { Text("Reset to defaults") }
+            if (showConfirm) {
+                AlertDialog(
+                    onDismissRequest = { showConfirm = false },
+                    title = { Text("Reset settings?") },
+                    text = { Text("All settings will be restored to their defaults. Your imported text is not affected.") },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            showConfirm = false
+                            vm.reset()
+                            Toast.makeText(ctx, "Settings reset to defaults", Toast.LENGTH_SHORT).show()
+                        }) { Text("Reset") }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showConfirm = false }) { Text("Cancel") }
+                    }
+                )
+            }
+        }
     }
 }
 
 @Composable
 private fun Section(title: String, content: @Composable ColumnScope.() -> Unit) {
-    Text(title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 16.dp, bottom = 4.dp))
-    Column(content = content)
+    var expanded by remember { mutableStateOf(true) }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { expanded = !expanded }
+            .padding(top = 16.dp, bottom = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(if (expanded) "▼" else "▶", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(end = 8.dp))
+        Text(title, style = MaterialTheme.typography.titleMedium)
+    }
+    if (expanded) {
+        Column(content = content)
+    }
     HorizontalDivider(Modifier.padding(vertical = 8.dp))
 }
 

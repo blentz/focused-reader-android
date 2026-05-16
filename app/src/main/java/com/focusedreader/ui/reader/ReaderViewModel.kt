@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -85,6 +86,17 @@ class ReaderViewModel @Inject constructor(
                 saveCounter++
                 if (saveCounter % 5 == 0) sessions.updatePosition(idx)
             }
+        }
+        // Reactively (re-)initialise or tear down TTS when the setting toggles
+        // mid-session. Without this, enabling TTS while the reader is running
+        // is silently ignored.
+        viewModelScope.launch {
+            settings.settings
+                .map { it.ttsEnabled }
+                .distinctUntilChanged()
+                .collect { enabled ->
+                    if (enabled) tts.init() else tts.shutdown()
+                }
         }
         viewModelScope.launch {
             val s = settings.settings.first()
