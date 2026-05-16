@@ -123,7 +123,7 @@ fun HomeScreenContent(
         }
         Text(
             "©",
-            style = MaterialTheme.typography.bodyMedium,
+            fontSize = androidx.compose.ui.unit.TextUnit(42f, androidx.compose.ui.unit.TextUnitType.Sp),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier
                 .align(Alignment.BottomEnd)

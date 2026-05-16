@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,14 +26,16 @@ import com.focusedreader.ui.theme.ThemeMode
 @Composable
 fun SettingsScreen(
     onCalibrateTts: () -> Unit,
+    onBack: () -> Unit = {},
     vm: SettingsViewModel = hiltViewModel()
 ) {
     val s by vm.settings.collectAsState()
     val ctx = LocalContext.current
     val current = s ?: return
 
+    Box(Modifier.fillMaxSize()) {
     Column(
-        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp).padding(top = 56.dp, end = 72.dp)
     ) {
         Section("Speed") {
             SliderRow("WPM step (${current.wpmStep})", current.wpmStep.toFloat(), 5f..100f, 18) { vm.setStep(it.toInt()) }
@@ -126,6 +130,13 @@ fun SettingsScreen(
                     }
                 )
             }
+        }
+    }
+        FloatingActionButton(
+            onClick = onBack,
+            modifier = Modifier.align(Alignment.TopStart).padding(16.dp)
+        ) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
         }
     }
 }

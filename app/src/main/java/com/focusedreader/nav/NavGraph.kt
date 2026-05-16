@@ -27,7 +27,8 @@ fun FocusedReaderNavGraph(nav: NavHostController = rememberNavController()) {
         }
         composable(Routes.SETTINGS) {
             SettingsScreen(
-                onCalibrateTts = { nav.navigate(Routes.TTS_CAL) }
+                onCalibrateTts = { nav.navigate(Routes.TTS_CAL) },
+                onBack = { nav.popBackStack() }
             )
         }
         composable(Routes.TTS_CAL) {
