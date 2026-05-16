@@ -2,7 +2,6 @@ package com.focusedreader.ui.settings
 
 import android.content.Intent
 import android.net.Uri
-import android.provider.Settings as AndroidSettings
 import android.widget.Toast
 import com.focusedreader.BuildConfig
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -59,8 +58,8 @@ fun SettingsScreen(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp).padding(top = 56.dp, end = 72.dp)
     ) {
         Section("Speed") {
-            SliderRow("WPM step (${current.wpmStep})", current.wpmStep.toFloat(), 5f..100f, 18) { vm.setStep(it.toInt()) }
-            SliderRow("WPM (${current.wpm})", current.wpm.toFloat(), 100f..900f, 16) { vm.setWpm(it.toInt()) }
+            SliderRow("WPM step (${current.wpmStep})", current.wpmStep.toFloat(), 5f..50f, 8) { vm.setStep(it.toInt()) }
+            SliderRow("WPM (${current.wpm})", current.wpm.toFloat(), 100f..400f, 6) { vm.setWpm(it.toInt()) }
         }
         Section("Pause / Resume") {
             SliderRow("Resume delay (${current.resumeDelaySec}s)", current.resumeDelaySec.toFloat(), 0f..10f, 10) { vm.setResume(it.toInt()) }
@@ -125,11 +124,6 @@ fun SettingsScreen(
                     )
                 }
             }
-        }
-        Section("Capture") {
-            Button(onClick = {
-                ctx.startActivity(Intent(AndroidSettings.ACTION_ACCESSIBILITY_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-            }) { Text("Open Accessibility Settings") }
         }
         Section("Maintenance") {
             var showConfirm by remember { mutableStateOf(false) }
@@ -213,7 +207,7 @@ fun SettingsScreen(
                 style = MaterialTheme.typography.bodySmall
             )
             Text(
-                "Libraries: Jetpack Compose, Hilt, Room, Jsoup, PDFBox-Android.",
+                "Libraries: Jetpack Compose, Hilt, Room, Jsoup.",
                 style = MaterialTheme.typography.bodySmall
             )
         }

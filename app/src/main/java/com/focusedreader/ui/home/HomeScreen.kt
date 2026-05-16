@@ -2,7 +2,6 @@ package com.focusedreader.ui.home
 
 import android.content.Intent
 import android.net.Uri
-import android.provider.Settings as AndroidSettings
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -16,7 +15,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -24,10 +22,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import com.focusedreader.capture.ImportTextUseCase
-import com.focusedreader.capture.PermissionStatus
 import com.focusedreader.capture.RouterEvent
 import com.focusedreader.data.Session
 import com.focusedreader.reader.WordTokenizer
@@ -42,18 +37,6 @@ fun HomeScreen(
     val isImporting by vm.isImporting.collectAsState()
     val showOnboarding by vm.showOnboarding.collectAsState()
     val ctx = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
-    var a11yEnabled by remember { mutableStateOf(PermissionStatus.isAccessibilityServiceEnabled(ctx)) }
-
-    DisposableEffect(lifecycleOwner) {
-        val obs = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                a11yEnabled = PermissionStatus.isAccessibilityServiceEnabled(ctx)
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(obs)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(obs) }
-    }
 
     val filePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
@@ -73,18 +56,11 @@ fun HomeScreen(
 
     HomeScreenContent(
         session = session,
-        a11yEnabled = a11yEnabled,
         isImporting = isImporting,
         showOnboarding = showOnboarding,
         onDismissOnboarding = vm::markOnboardingComplete,
         onRead = onRead,
         onSettings = onSettings,
-        onEnableA11y = {
-            ctx.startActivity(
-                Intent(AndroidSettings.ACTION_ACCESSIBILITY_SETTINGS)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            )
-        },
         onPasteFromClipboard = {
             vm.importFromClipboard { result ->
                 val msg = when (result) {
@@ -98,13 +74,10 @@ fun HomeScreen(
         },
         onOpenFile = {
             filePickerLauncher.launch(
-                arrayOf("text/plain", "text/html", "text/markdown", "application/pdf")
+                arrayOf("text/plain", "text/html", "text/markdown")
             )
         }
     )
-
-    // Update the file-picker result lambda to handle FileTooLarge.
-    // (The launcher above was set up earlier; this is a side note for the reader.)
 
     LaunchedEffect(Unit) {
         vm.routerEvents.collect { event ->
@@ -120,17 +93,8 @@ fun HomeScreen(
                 }
                 RouterEvent.Resume -> if (session != null) onRead()
                 RouterEvent.OpenFile -> filePickerLauncher.launch(
-                    arrayOf("text/plain", "text/html", "text/markdown", "application/pdf")
+                    arrayOf("text/plain", "text/html", "text/markdown")
                 )
-                is RouterEvent.ImportText -> vm.importRawText(event.text) { result ->
-                    val msg = when (result) {
-                        ImportTextUseCase.Result.Empty -> "No text on tag"
-                        ImportTextUseCase.Result.Ok -> "Imported from NFC"
-                        ImportTextUseCase.Result.FetchFailed -> "Failed to fetch URL"
-                        is ImportTextUseCase.Result.FileTooLarge -> "File too large"
-                    }
-                    Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show()
-                }
             }
         }
     }
@@ -139,10 +103,8 @@ fun HomeScreen(
 @Composable
 fun HomeScreenContent(
     session: Session?,
-    a11yEnabled: Boolean,
     onRead: () -> Unit,
     onSettings: () -> Unit,
-    onEnableA11y: () -> Unit,
     onPasteFromClipboard: () -> Unit,
     onOpenFile: () -> Unit,
     isImporting: Boolean = false,
@@ -156,10 +118,8 @@ fun HomeScreenContent(
         CompositionLocalProvider(LocalDensity provides scaled) {
             HomeBody(
                 session = session,
-                a11yEnabled = a11yEnabled,
                 onRead = onRead,
                 onSettings = onSettings,
-                onEnableA11y = onEnableA11y,
                 onPasteFromClipboard = onPasteFromClipboard,
                 onOpenFile = onOpenFile
             )
@@ -193,7 +153,6 @@ fun HomeScreenContent(
                     .then(Modifier),
                 contentAlignment = Alignment.Center
             ) {
-                // Translucent scrim
                 Box(
                     Modifier
                         .fillMaxSize()
@@ -235,16 +194,11 @@ private fun OnboardingDialog(onDismiss: () -> Unit) {
                 )
                 Spacer(Modifier.height(12.dp))
                 Text(
-                    "Accessibility capture: enable the Focused Reader accessibility service to " +
-                        "grab the text on screen with one tap from the Quick Settings tile."
-                )
-                Spacer(Modifier.height(12.dp))
-                Text(
                     "Clipboard import: copy text or a URL, then tap Paste from clipboard on the home screen."
                 )
                 Spacer(Modifier.height(12.dp))
                 Text(
-                    "Open a file: tap Open file… to read any local .txt file directly."
+                    "Open a file: tap Open file… to read any local .txt / .md / .html file directly."
                 )
             }
         },
@@ -257,10 +211,8 @@ private fun OnboardingDialog(onDismiss: () -> Unit) {
 @Composable
 private fun HomeBody(
     session: Session?,
-    a11yEnabled: Boolean,
     onRead: () -> Unit,
     onSettings: () -> Unit,
-    onEnableA11y: () -> Unit,
     onPasteFromClipboard: () -> Unit,
     onOpenFile: () -> Unit
 ) {
@@ -274,28 +226,6 @@ private fun HomeBody(
     ) {
         Text("Focused Reader", style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(16.dp))
-        if (!a11yEnabled) {
-            Card(
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        "Accessibility capture is disabled",
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onErrorContainer
-                    )
-                    Text(
-                        "Enable in system settings to use the Quick Settings tile",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onErrorContainer
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    Button(onClick = onEnableA11y) { Text("Enable") }
-                }
-            }
-            Spacer(Modifier.height(16.dp))
-        }
         session?.let {
             Text("Last import: ${it.source.name}", style = MaterialTheme.typography.bodyMedium)
             Text(it.text.take(80) + if (it.text.length > 80) "…" else "", style = MaterialTheme.typography.bodySmall)

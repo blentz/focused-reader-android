@@ -32,7 +32,7 @@ class SessionDaoTest {
 
     @Test fun upsert_replaces_existing() = runBlocking {
         dao.upsert(Session(text = "a", position = 0, source = ImportSource.SHARE, importedAt = 1L))
-        dao.upsert(Session(text = "b", position = 5, source = ImportSource.A11Y, importedAt = 2L))
+        dao.upsert(Session(text = "b", position = 5, source = ImportSource.CLIPBOARD, importedAt = 2L))
         val got = dao.get()!!
         assertEquals("b", got.text); assertEquals(5, got.position)
     }
