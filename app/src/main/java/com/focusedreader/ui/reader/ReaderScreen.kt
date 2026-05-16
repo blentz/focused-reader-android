@@ -46,6 +46,11 @@ fun ReaderScreen(
         vm.togglePause()
     }
 
+    // End of text → exit to Home instead of sitting on the Idle "No session" screen.
+    LaunchedEffect(Unit) {
+        vm.finishedEvents.collect { onExit() }
+    }
+
     DisposableEffect(Unit) {
         val activity = ctx as? ComponentActivity
         val prior = activity?.requestedOrientation

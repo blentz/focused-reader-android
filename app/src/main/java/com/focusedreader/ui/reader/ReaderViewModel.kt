@@ -66,6 +66,10 @@ class ReaderViewModel(
     private val _wpmHudPulse = MutableSharedFlow<Int>(extraBufferCapacity = 8)
     val wpmHudPulse: SharedFlow<Int> = _wpmHudPulse.asSharedFlow()
 
+    /** Emits when the reader has finished a text (engine reached the end). UI exits to Home. */
+    private val _finishedEvents = MutableSharedFlow<Unit>(extraBufferCapacity = 2)
+    val finishedEvents: SharedFlow<Unit> = _finishedEvents.asSharedFlow()
+
     /** Fires once the first time WPM goes negative, to teach Vol-Up recovery. */
     private val _reverseHintPulse = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val reverseHintPulse: SharedFlow<Unit> = _reverseHintPulse.asSharedFlow()
@@ -136,6 +140,7 @@ class ReaderViewModel(
             kotlinx.coroutines.delay(1500)
             sessions.updatePosition(0)
             _state.value = ReaderState.Idle
+            _finishedEvents.emit(Unit)
         }
     }
 

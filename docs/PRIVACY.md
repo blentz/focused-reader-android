@@ -25,7 +25,6 @@ The app does not contact any first-party server. It contacts third-party servers
 |---|---|
 | `android.permission.INTERNET` | Fetch the page content when you share a URL. |
 | `android.permission.VIBRATE` | Haptic tick per word when you enable haptic feedback in Settings. |
-| `android.permission.POST_NOTIFICATIONS` | Reserved for future Resume / Stop notifications. Currently unused; we request it once so it's available if enabled later. |
 | `android.permission.NFC` | Read text or URLs from NFC tags you tap to the phone. |
 | `android.permission.BIND_ACCESSIBILITY_SERVICE` | See the dedicated [Accessibility Service Purpose](A11Y_PURPOSE.md) document. |
 | `android.permission.BIND_QUICK_SETTINGS_TILE` | Provide a Quick Settings tile that triggers Accessibility capture on demand. |
