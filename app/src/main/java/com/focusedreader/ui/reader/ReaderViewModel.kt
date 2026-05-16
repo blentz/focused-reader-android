@@ -204,19 +204,19 @@ class ReaderViewModel(
     }
 
     fun seekTo(index: Int) {
-        viewModelScope.launch {
-            val target = index.coerceIn(0, (tokens.size - 1).coerceAtLeast(0))
-            sessions.updatePosition(target)
-            _state.update { cur ->
-                when (cur) {
-                    is ReaderState.Reading -> cur.copy(index = target)
-                    is ReaderState.Paused -> cur.copy(index = target)
-                    is ReaderState.Resuming -> cur.copy(index = target)
-                    ReaderState.Idle -> cur
-                }
+        val target = index.coerceIn(0, (tokens.size - 1).coerceAtLeast(0))
+        // Update state synchronously so the next togglePause() in the same UI
+        // tick sees the new index (prevents a Resume-after-seek race).
+        _state.update { cur ->
+            when (cur) {
+                is ReaderState.Reading -> cur.copy(index = target)
+                is ReaderState.Paused -> cur.copy(index = target)
+                is ReaderState.Resuming -> cur.copy(index = target)
+                ReaderState.Idle -> cur
             }
-            if (_state.value is ReaderState.Reading) startEngine(target, currentWpm())
         }
+        viewModelScope.launch { sessions.updatePosition(target) }
+        if (_state.value is ReaderState.Reading) startEngine(target, currentWpm())
     }
 
     private fun currentWpm(): Int = when (val s = _state.value) {
