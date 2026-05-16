@@ -2,6 +2,8 @@
 
 A focused, configurable RSVP (Rapid Serial Visual Presentation) speed-reader for Android. Highlight text anywhere on your phone, share it, and read one word at a time at speeds from -100 to 900 WPM, with the optimal recognition point (ORP) highlighted to keep your eyes still.
 
+![Demo](docs/demo.gif)
+
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 ## Features
