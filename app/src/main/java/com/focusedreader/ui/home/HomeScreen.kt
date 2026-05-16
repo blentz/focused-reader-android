@@ -29,6 +29,7 @@ fun HomeScreen(
                 val msg = when (result) {
                     ImportTextUseCase.Result.Empty -> "Clipboard is empty"
                     ImportTextUseCase.Result.Ok -> "Imported from clipboard"
+                    ImportTextUseCase.Result.FetchFailed -> "Failed to fetch URL"
                 }
                 Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show()
             }
