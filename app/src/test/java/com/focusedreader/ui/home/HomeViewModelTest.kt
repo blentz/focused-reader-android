@@ -132,7 +132,7 @@ class HomeViewModelTest {
     @Test
     fun `importFromFile reads file then imports with FILE source`() = runTest(dispatcher) {
         val uri = mockk<Uri>(relaxed = true)
-        coEvery { filePicker.readText(ctx, uri) } returns "some body"
+        coEvery { filePicker.read(ctx, uri) } returns FilePicker.Result.Ok("some body")
         coEvery { importer.invoke("some body", ImportSource.FILE) } returns ImportTextUseCase.Result.Ok
         val vm = vm()
         var received: ImportTextUseCase.Result? = null
@@ -140,21 +140,30 @@ class HomeViewModelTest {
         runCurrent()
         assertEquals(ImportTextUseCase.Result.Ok, received)
         assertFalse(vm.isImporting.value)
-        coVerify { filePicker.readText(ctx, uri) }
+        coVerify { filePicker.read(ctx, uri) }
         coVerify { importer.invoke("some body", ImportSource.FILE) }
     }
 
     @Test
-    fun `importFromFile forwards null when file unreadable`() = runTest(dispatcher) {
+    fun `importFromFile forwards FetchFailed when file unreadable`() = runTest(dispatcher) {
         val uri = mockk<Uri>(relaxed = true)
-        coEvery { filePicker.readText(ctx, uri) } returns null
-        coEvery { importer.invoke(null, ImportSource.FILE) } returns ImportTextUseCase.Result.Empty
+        coEvery { filePicker.read(ctx, uri) } returns FilePicker.Result.ReadFailed
         val vm = vm()
         var received: ImportTextUseCase.Result? = null
         vm.importFromFile(uri) { received = it }
         runCurrent()
-        assertEquals(ImportTextUseCase.Result.Empty, received)
-        coVerify { importer.invoke(null, ImportSource.FILE) }
+        assertEquals(ImportTextUseCase.Result.FetchFailed, received)
+    }
+
+    @Test
+    fun `importFromFile forwards FileTooLarge when oversized`() = runTest(dispatcher) {
+        val uri = mockk<Uri>(relaxed = true)
+        coEvery { filePicker.read(ctx, uri) } returns FilePicker.Result.TooLarge(99_000_000)
+        val vm = vm()
+        var received: ImportTextUseCase.Result? = null
+        vm.importFromFile(uri) { received = it }
+        runCurrent()
+        assertEquals(99_000_000L, (received as ImportTextUseCase.Result.FileTooLarge).sizeBytes)
     }
 
     @Test

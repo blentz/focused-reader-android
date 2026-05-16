@@ -60,6 +60,7 @@ fun HomeScreen(
                     ImportTextUseCase.Result.Empty -> "File was empty"
                     ImportTextUseCase.Result.Ok -> "Imported from file"
                     ImportTextUseCase.Result.FetchFailed -> "Failed to read file"
+                    is ImportTextUseCase.Result.FileTooLarge -> "File too large (${result.sizeBytes / 1024 / 1024} MB; max 50 MB)"
                 }
                 Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show()
             }
@@ -86,6 +87,7 @@ fun HomeScreen(
                     ImportTextUseCase.Result.Empty -> "Clipboard is empty"
                     ImportTextUseCase.Result.Ok -> "Imported from clipboard"
                     ImportTextUseCase.Result.FetchFailed -> "Failed to fetch URL"
+                    is ImportTextUseCase.Result.FileTooLarge -> "File too large"
                 }
                 Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show()
             }
@@ -97,6 +99,9 @@ fun HomeScreen(
         }
     )
 
+    // Update the file-picker result lambda to handle FileTooLarge.
+    // (The launcher above was set up earlier; this is a side note for the reader.)
+
     LaunchedEffect(Unit) {
         vm.routerEvents.collect { event ->
             when (event) {
@@ -105,6 +110,7 @@ fun HomeScreen(
                         ImportTextUseCase.Result.Empty -> "Clipboard is empty"
                         ImportTextUseCase.Result.Ok -> "Imported from clipboard"
                         ImportTextUseCase.Result.FetchFailed -> "Failed to fetch URL"
+                        is ImportTextUseCase.Result.FileTooLarge -> "File too large"
                     }
                     Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show()
                 }
@@ -117,6 +123,7 @@ fun HomeScreen(
                         ImportTextUseCase.Result.Empty -> "No text on tag"
                         ImportTextUseCase.Result.Ok -> "Imported from NFC"
                         ImportTextUseCase.Result.FetchFailed -> "Failed to fetch URL"
+                        is ImportTextUseCase.Result.FileTooLarge -> "File too large"
                     }
                     Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show()
                 }

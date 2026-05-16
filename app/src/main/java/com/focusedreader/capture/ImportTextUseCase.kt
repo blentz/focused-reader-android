@@ -12,6 +12,7 @@ class ImportTextUseCase @Inject constructor(
         data object Empty : Result()
         data object Ok : Result()
         data object FetchFailed : Result()
+        data class FileTooLarge(val sizeBytes: Long) : Result()
     }
 
     suspend operator fun invoke(text: String?, source: ImportSource): Result {

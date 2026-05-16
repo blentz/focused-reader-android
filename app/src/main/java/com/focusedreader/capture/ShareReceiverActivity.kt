@@ -82,11 +82,13 @@ class ShareReceiverActivity : ComponentActivity() {
             if (!isUrl) {
                 Toast.makeText(this@ShareReceiverActivity, "Importing…", Toast.LENGTH_SHORT).show()
             }
-            when (importer(text, ImportSource.SHARE)) {
+            when (val r = importer(text, ImportSource.SHARE)) {
                 ImportTextUseCase.Result.Empty ->
                     Toast.makeText(this@ShareReceiverActivity, "No text to read", Toast.LENGTH_SHORT).show()
                 ImportTextUseCase.Result.FetchFailed ->
                     Toast.makeText(this@ShareReceiverActivity, "Failed to fetch URL", Toast.LENGTH_LONG).show()
+                is ImportTextUseCase.Result.FileTooLarge ->
+                    Toast.makeText(this@ShareReceiverActivity, "File too large", Toast.LENGTH_LONG).show()
                 ImportTextUseCase.Result.Ok ->
                     startActivity(Intent(this@ShareReceiverActivity, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             }

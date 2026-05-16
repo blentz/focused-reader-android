@@ -61,8 +61,13 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             _isImporting.value = true
             try {
-                val text = filePicker.readText(appContext, uri)
-                onResult(importer(text, ImportSource.FILE))
+                val res = filePicker.read(appContext, uri)
+                val mapped = when (res) {
+                    is FilePicker.Result.TooLarge -> ImportTextUseCase.Result.FileTooLarge(res.sizeBytes)
+                    is FilePicker.Result.ReadFailed -> ImportTextUseCase.Result.FetchFailed
+                    is FilePicker.Result.Ok -> importer(res.text, ImportSource.FILE)
+                }
+                onResult(mapped)
             } finally {
                 _isImporting.value = false
             }
