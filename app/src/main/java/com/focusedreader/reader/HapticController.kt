@@ -31,7 +31,8 @@ class HapticController @Inject constructor(
         if (mode == HapticMode.PER_PUNCTUATION && word.lastOrNull() !in punctuation) return
         val v = vibrator ?: return
         if (!v.hasVibrator()) return
-        val amplitude = (intensityPct / 100.0 * 255).toInt().coerceIn(1, 255)
-        v.vibrate(VibrationEffect.createOneShot(15L, amplitude))
+        // intensityPct is 0..33; scale into 90..255 so even low values are felt.
+        val amplitude = (90 + (intensityPct.coerceAtMost(33) / 33.0) * 165).toInt().coerceIn(90, 255)
+        v.vibrate(VibrationEffect.createOneShot(35L, amplitude))
     }
 }

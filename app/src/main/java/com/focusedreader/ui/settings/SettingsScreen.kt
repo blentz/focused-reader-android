@@ -31,7 +31,7 @@ fun SettingsScreen(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)
     ) {
         Section("Speed") {
-            SliderRow("WPM step (${current.wpmStep})", current.wpmStep.toFloat(), 10f..100f, 9) { vm.setStep(it.toInt()) }
+            SliderRow("WPM step (${current.wpmStep})", current.wpmStep.toFloat(), 5f..100f, 18) { vm.setStep(it.toInt()) }
             SliderRow("WPM (${current.wpm})", current.wpm.toFloat(), 100f..900f, 16) { vm.setWpm(it.toInt()) }
         }
         Section("Pause / Resume") {
