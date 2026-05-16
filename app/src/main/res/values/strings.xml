@@ -1,4 +1,12 @@
 <resources>
     <string name="app_name">Focused Reader</string>
     <string name="a11y_description">Captures text from the foreground app on demand.</string>
+    <string name="shortcut_paste_short">Paste</string>
+    <string name="shortcut_paste_long">Paste from clipboard</string>
+    <string name="shortcut_resume_short">Resume</string>
+    <string name="shortcut_resume_long">Resume reading</string>
+    <string name="shortcut_file_short">Open file</string>
+    <string name="shortcut_file_long">Open .txt/.md/.html/.pdf</string>
+    <string name="share_target_short">Read text</string>
+    <string name="share_target_long">Read text in Focused Reader</string>
 </resources>

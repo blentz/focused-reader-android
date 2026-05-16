@@ -13,6 +13,20 @@ class UrlFetcher @Inject constructor() {
 
     fun looksLikeUrl(text: String): Boolean = urlPattern.matches(text)
 
+    fun looksLikeHtml(text: String): Boolean {
+        val sample = text.take(2048)
+        return sample.contains("<html", ignoreCase = true) ||
+            sample.contains("<body", ignoreCase = true) ||
+            sample.contains("<!doctype html", ignoreCase = true)
+    }
+
+    fun extractHtmlText(html: String): String {
+        val doc = Jsoup.parse(html)
+        doc.select("script, style, nav, footer, aside, header, noscript").remove()
+        val container = doc.selectFirst("article, main") ?: doc.body()
+        return container?.text().orEmpty().replace(Regex("\\s+"), " ").trim()
+    }
+
     suspend fun fetchAndExtract(url: String): String? = withContext(Dispatchers.IO) {
         runCatching {
             val response = Jsoup.connect(url.trim())

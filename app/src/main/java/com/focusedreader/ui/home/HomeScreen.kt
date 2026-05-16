@@ -24,6 +24,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.focusedreader.capture.ImportTextUseCase
 import com.focusedreader.capture.PermissionStatus
+import com.focusedreader.capture.RouterEvent
 import com.focusedreader.data.Session
 import com.focusedreader.reader.WordTokenizer
 
@@ -89,8 +90,39 @@ fun HomeScreen(
                 Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show()
             }
         },
-        onOpenFile = { filePickerLauncher.launch(arrayOf("text/plain")) }
+        onOpenFile = {
+            filePickerLauncher.launch(
+                arrayOf("text/plain", "text/html", "text/markdown", "application/pdf")
+            )
+        }
     )
+
+    LaunchedEffect(Unit) {
+        vm.routerEvents.collect { event ->
+            when (event) {
+                RouterEvent.PasteClipboard -> vm.importFromClipboard { result ->
+                    val msg = when (result) {
+                        ImportTextUseCase.Result.Empty -> "Clipboard is empty"
+                        ImportTextUseCase.Result.Ok -> "Imported from clipboard"
+                        ImportTextUseCase.Result.FetchFailed -> "Failed to fetch URL"
+                    }
+                    Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show()
+                }
+                RouterEvent.Resume -> if (session != null) onRead()
+                RouterEvent.OpenFile -> filePickerLauncher.launch(
+                    arrayOf("text/plain", "text/html", "text/markdown", "application/pdf")
+                )
+                is RouterEvent.ImportText -> vm.importRawText(event.text) { result ->
+                    val msg = when (result) {
+                        ImportTextUseCase.Result.Empty -> "No text on tag"
+                        ImportTextUseCase.Result.Ok -> "Imported from NFC"
+                        ImportTextUseCase.Result.FetchFailed -> "Failed to fetch URL"
+                    }
+                    Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
 }
 
 @Composable

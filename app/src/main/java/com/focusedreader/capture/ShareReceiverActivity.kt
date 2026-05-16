@@ -34,7 +34,11 @@ class ShareReceiverActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val text = intent?.getStringExtra(Intent.EXTRA_TEXT)
+        val text = intent?.let { i ->
+            i.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT)?.toString()
+                ?: i.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT_READONLY)?.toString()
+                ?: i.getStringExtra(Intent.EXTRA_TEXT)
+        }
         val isUrl = text != null && urlFetcher.looksLikeUrl(text.trim())
 
         // For URL imports, show a visible loading UI since fetch may take up to 15s.

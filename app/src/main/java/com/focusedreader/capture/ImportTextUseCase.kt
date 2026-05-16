@@ -18,9 +18,13 @@ class ImportTextUseCase @Inject constructor(
         val cleaned = text?.trim().orEmpty()
         if (cleaned.isBlank()) return Result.Empty
 
-        val content = if (urlFetcher.looksLikeUrl(cleaned)) {
-            urlFetcher.fetchAndExtract(cleaned) ?: return Result.FetchFailed
-        } else cleaned
+        val content = when {
+            urlFetcher.looksLikeUrl(cleaned) ->
+                urlFetcher.fetchAndExtract(cleaned) ?: return Result.FetchFailed
+            urlFetcher.looksLikeHtml(cleaned) ->
+                urlFetcher.extractHtmlText(cleaned)
+            else -> cleaned
+        }
 
         if (content.isBlank()) return Result.Empty
         repo.import(content, source)

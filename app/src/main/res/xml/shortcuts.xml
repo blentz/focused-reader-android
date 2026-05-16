@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="paste"
+        android:enabled="true"
+        android:icon="@android:drawable/ic_menu_edit"
+        android:shortcutShortLabel="@string/shortcut_paste_short"
+        android:shortcutLongLabel="@string/shortcut_paste_long">
+        <intent
+            android:action="com.focusedreader.action.PASTE_CLIPBOARD"
+            android:targetPackage="com.focusedreader"
+            android:targetClass="com.focusedreader.MainActivity" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="resume"
+        android:enabled="true"
+        android:icon="@android:drawable/ic_media_play"
+        android:shortcutShortLabel="@string/shortcut_resume_short"
+        android:shortcutLongLabel="@string/shortcut_resume_long">
+        <intent
+            android:action="com.focusedreader.action.RESUME"
+            android:targetPackage="com.focusedreader"
+            android:targetClass="com.focusedreader.MainActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="open_file"
+        android:enabled="true"
+        android:icon="@android:drawable/ic_menu_upload"
+        android:shortcutShortLabel="@string/shortcut_file_short"
+        android:shortcutLongLabel="@string/shortcut_file_long">
+        <intent
+            android:action="com.focusedreader.action.OPEN_FILE"
+            android:targetPackage="com.focusedreader"
+            android:targetClass="com.focusedreader.MainActivity" />
+    </shortcut>
+
+    <share-target android:targetClass="com.focusedreader.capture.ShareReceiverActivity">
+        <data android:mimeType="text/*" />
+        <category android:name="android.shortcut.conversation" />
+    </share-target>
+</shortcuts>
