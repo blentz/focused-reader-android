@@ -30,7 +30,7 @@ class UrlFetcher @Inject constructor() {
     suspend fun fetchAndExtract(url: String): String? = withContext(Dispatchers.IO) {
         runCatching {
             val response = Jsoup.connect(url.trim())
-                .timeout(15_000)
+                .timeout(10_000)
                 .userAgent("Mozilla/5.0 FocusedReader/0.1")
                 .ignoreContentType(true)
                 .followRedirects(true)

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
@@ -24,6 +25,7 @@ import com.focusedreader.MainActivity
 import com.focusedreader.data.ImportSource
 import com.focusedreader.ui.theme.FocusedReaderTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -31,6 +33,8 @@ import javax.inject.Inject
 class ShareReceiverActivity : ComponentActivity() {
     @Inject lateinit var importer: ImportTextUseCase
     @Inject lateinit var urlFetcher: UrlFetcher
+
+    private var importJob: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,6 +65,12 @@ class ShareReceiverActivity : ComponentActivity() {
                                     style = MaterialTheme.typography.bodyLarge,
                                     color = MaterialTheme.colorScheme.onBackground
                                 )
+                                Spacer(Modifier.height(24.dp))
+                                OutlinedButton(onClick = {
+                                    importJob?.cancel()
+                                    Toast.makeText(this@ShareReceiverActivity, "Cancelled", Toast.LENGTH_SHORT).show()
+                                    finish()
+                                }) { Text("Cancel") }
                             }
                         }
                     }
@@ -68,7 +78,7 @@ class ShareReceiverActivity : ComponentActivity() {
             }
         }
 
-        lifecycleScope.launch {
+        importJob = lifecycleScope.launch {
             if (!isUrl) {
                 Toast.makeText(this@ShareReceiverActivity, "Importing…", Toast.LENGTH_SHORT).show()
             }
