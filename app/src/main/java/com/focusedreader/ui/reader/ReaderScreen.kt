@@ -87,19 +87,13 @@ fun ReaderScreen(
         ReaderState.Idle -> emptyList()
     }
 
-    val fontSize: TextUnit = remember(tokens, s.font, configuration.screenWidthDp, configuration.screenHeightDp) {
-        if (tokens.isEmpty()) {
-            96.sp
-        } else {
-            val refSize = 100.sp
-            val refStyle = TextStyle(fontSize = refSize, fontFamily = fontFamily, fontWeight = FontWeight.Medium)
-            val measured = measurer.measure("Hg", refStyle, maxLines = 1)
-            val heightAtRef = measured.size.height.coerceAtLeast(1)
-            val targetHeightPx = with(density) { (configuration.screenHeightDp.dp * 0.6f).toPx() }
-            val scale = (targetHeightPx / heightAtRef).coerceIn(1.0f, 12.0f)
-            (refSize.value * scale).sp
-        }
-    }
+    // Per-word fit-to-width sizing: each word's pivot is anchored at screen
+    // centre, so the wider of left-of-pivot or right-of-pivot dictates the
+    // scale. A small height cap prevents single-char words from blowing up
+    // beyond the screen vertically.
+    val maxHeightPx = with(density) { (configuration.screenHeightDp.dp * 0.7f).toPx() }
+    val leftBudgetPx = with(density) { (configuration.screenWidthDp.dp * 0.475f).toPx() }
+    val rightBudgetPx = leftBudgetPx
 
     Box(
         Modifier
@@ -111,28 +105,23 @@ fun ReaderScreen(
             ReaderState.Idle -> Text("No session", color = palette.word, modifier = Modifier.align(Alignment.Center))
             is ReaderState.Reading -> {
                 val word = sst.tokens.getOrNull(sst.index) ?: ""
-                val bucketScale = when {
-                    word.length <= 8 -> 1.0f
-                    word.length <= 16 -> 0.8f
-                    else -> 0.6f
-                }
-                val candidate = (fontSize.value * bucketScale).sp
-                val finalSize = remember(word, candidate, fontFamily, configuration.screenWidthDp) {
-                    if (word.isEmpty()) candidate
+                val finalSize = remember(word, fontFamily, configuration.screenWidthDp, configuration.screenHeightDp) {
+                    if (word.isEmpty()) 96.sp
                     else {
-                        val style = TextStyle(fontSize = candidate, fontFamily = fontFamily, fontWeight = FontWeight.Medium)
+                        val refSize = 100.sp
+                        val style = TextStyle(fontSize = refSize, fontFamily = fontFamily, fontWeight = FontWeight.Medium)
                         val split = OrpCalculator.split(word)
                         val leftW = if (split.left.isEmpty()) 0 else measurer.measure(split.left, style, maxLines = 1).size.width
                         val pivotW = measurer.measure(split.pivot.toString(), style, maxLines = 1).size.width
                         val rightW = if (split.right.isEmpty()) 0 else measurer.measure(split.right, style, maxLines = 1).size.width
-                        val anchorPx = with(density) { (configuration.screenWidthDp.dp * 0.5f).toPx() }
-                        val screenPx = with(density) { (configuration.screenWidthDp.dp * 0.97f).toPx() }
+                        val heightAtRef = measurer.measure("Hg", style, maxLines = 1).size.height.coerceAtLeast(1)
                         val leftNeed = (leftW + pivotW / 2f).coerceAtLeast(1f)
                         val rightNeed = (rightW + pivotW / 2f).coerceAtLeast(1f)
-                        val leftScale = anchorPx / leftNeed
-                        val rightScale = (screenPx - anchorPx) / rightNeed
-                        val widthScale = minOf(leftScale, rightScale, 1f)
-                        (candidate.value * widthScale).sp
+                        val scaleByLeft = leftBudgetPx / leftNeed
+                        val scaleByRight = rightBudgetPx / rightNeed
+                        val scaleByHeight = maxHeightPx / heightAtRef
+                        val scale = minOf(scaleByLeft, scaleByRight, scaleByHeight)
+                        (refSize.value * scale).sp
                     }
                 }
                 OrpWord(
