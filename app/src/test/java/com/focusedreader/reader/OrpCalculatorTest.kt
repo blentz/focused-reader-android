@@ -1,61 +1,54 @@
 package com.focusedreader.reader
 
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.DynamicTest
-import org.junit.jupiter.api.TestFactory
+import org.junit.jupiter.api.Test
 
 class OrpCalculatorTest {
-    // min(length / 2, 4) — pivot tracks geometric middle for short words and
-    // caps at idx 4 so long words don't push the highlight too far right.
-    private val cases = listOf(
-        1 to 0,
-        2 to 1, 3 to 1,
-        4 to 2, 5 to 2,
-        6 to 3, 7 to 3,
-        8 to 4, 9 to 4,
-        10 to 4, 11 to 4, 12 to 4, 13 to 4,
-        14 to 4, 28 to 4, 50 to 4
-    )
 
-    @TestFactory
-    fun `pivot index is min length-over-two and four`() = cases.map { (len, expected) ->
-        DynamicTest.dynamicTest("len=$len -> $expected") {
-            assertEquals(expected, OrpCalculator.pivotIndex(len))
-        }
+    @Test fun `single char picks self`() {
+        assertEquals('a', OrpCalculator.split("a").pivot)
     }
 
-    @org.junit.jupiter.api.Test
-    fun `split pad picks a`() {
-        assertEquals('a', OrpCalculator.split("pad").pivot)
+    @Test fun `pad odd length picks middle`() {
+        val s = OrpCalculator.split("pad")
+        assertEquals('a', s.pivot)
+        assertEquals("p", s.left)
+        assertEquals("d", s.right)
     }
 
-    @org.junit.jupiter.api.Test
-    fun `split discover picks o`() {
+    @Test fun `discover even length picks after-middle`() {
         val s = OrpCalculator.split("discover")
         assertEquals('o', s.pivot)
         assertEquals("disc", s.left)
         assertEquals("ver", s.right)
     }
 
-    @org.junit.jupiter.api.Test
-    fun `split accompanied picks m`() {
+    @Test fun `accompanied odd length picks middle`() {
         val s = OrpCalculator.split("accompanied")
-        assertEquals('m', s.pivot)
-        assertEquals("acco", s.left)
-        assertEquals("panied", s.right)
+        assertEquals('p', s.pivot)
+        assertEquals("accom", s.left)
+        assertEquals("anied", s.right)
     }
 
-    @org.junit.jupiter.api.Test
-    fun `split commencement picks e`() {
+    @Test fun `commencement even length picks after-middle`() {
         val s = OrpCalculator.split("commencement")
-        assertEquals('e', s.pivot)
-        assertEquals("comm", s.left)
-        assertEquals("ncement", s.right)
+        assertEquals('c', s.pivot)
+        assertEquals("commen", s.left)
+        assertEquals("ement", s.right)
     }
 
-    @org.junit.jupiter.api.Test
-    fun `split single char`() {
-        val s = OrpCalculator.split("a")
-        assertEquals("", s.left); assertEquals('a', s.pivot); assertEquals("", s.right)
+    @Test fun `trailing punctuation excluded from count`() {
+        val s = OrpCalculator.split("Hello,")
+        assertEquals('l', s.pivot)
+    }
+
+    @Test fun `internal apostrophe excluded from count`() {
+        val s = OrpCalculator.split("isn't")
+        assertEquals('n', s.pivot)
+    }
+
+    @Test fun `all symbols falls back to middle char`() {
+        val s = OrpCalculator.split("---")
+        assertEquals('-', s.pivot)
     }
 }
