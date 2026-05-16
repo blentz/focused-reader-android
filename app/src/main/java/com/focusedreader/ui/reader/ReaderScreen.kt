@@ -118,7 +118,7 @@ fun ReaderScreen(
                         val leftW = if (split.left.isEmpty()) 0 else measurer.measure(split.left, style, maxLines = 1).size.width
                         val pivotW = measurer.measure(split.pivot.toString(), style, maxLines = 1).size.width
                         val rightW = if (split.right.isEmpty()) 0 else measurer.measure(split.right, style, maxLines = 1).size.width
-                        val anchorPx = with(density) { (configuration.screenWidthDp.dp * 0.38f).toPx() }
+                        val anchorPx = with(density) { (configuration.screenWidthDp.dp * 0.5f).toPx() }
                         val screenPx = with(density) { (configuration.screenWidthDp.dp * 0.97f).toPx() }
                         val leftNeed = (leftW + pivotW / 2f).coerceAtLeast(1f)
                         val rightNeed = (rightW + pivotW / 2f).coerceAtLeast(1f)

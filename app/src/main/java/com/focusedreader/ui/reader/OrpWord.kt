@@ -25,7 +25,7 @@ fun OrpWord(
     orpColor: Color,
     fontSize: TextUnit,
     fontFamily: FontFamily,
-    pivotAnchorFraction: Float = 0.38f,
+    pivotAnchorFraction: Float = 0.5f,
     modifier: Modifier = Modifier
 ) {
     if (word.isEmpty()) return
