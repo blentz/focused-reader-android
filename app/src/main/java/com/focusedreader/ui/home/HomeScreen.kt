@@ -1,17 +1,21 @@
 package com.focusedreader.ui.home
 
 import android.content.Intent
+import android.net.Uri
 import android.provider.Settings as AndroidSettings
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -83,6 +87,50 @@ fun HomeScreen(
 
 @Composable
 fun HomeScreenContent(
+    session: Session?,
+    a11yEnabled: Boolean,
+    onRead: () -> Unit,
+    onSettings: () -> Unit,
+    onEnableA11y: () -> Unit,
+    onPasteFromClipboard: () -> Unit,
+    onOpenFile: () -> Unit
+) {
+    val ctx = LocalContext.current
+    val base = LocalDensity.current
+    val scaled = Density(density = base.density, fontScale = base.fontScale * 1.25f)
+    Box(Modifier.fillMaxSize()) {
+        CompositionLocalProvider(LocalDensity provides scaled) {
+            HomeBody(
+                session = session,
+                a11yEnabled = a11yEnabled,
+                onRead = onRead,
+                onSettings = onSettings,
+                onEnableA11y = onEnableA11y,
+                onPasteFromClipboard = onPasteFromClipboard,
+                onOpenFile = onOpenFile
+            )
+        }
+        Text(
+            "©",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+                .clickable {
+                    ctx.startActivity(
+                        Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse("https://github.com/blentz/focused-reader-android/blob/main/LICENSE")
+                        ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    )
+                }
+        )
+    }
+}
+
+@Composable
+private fun HomeBody(
     session: Session?,
     a11yEnabled: Boolean,
     onRead: () -> Unit,
