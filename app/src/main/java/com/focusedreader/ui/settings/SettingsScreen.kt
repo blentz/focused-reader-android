@@ -112,7 +112,40 @@ fun SettingsScreen(
         }
         Section("Maintenance") {
             var showConfirm by remember { mutableStateOf(false) }
+            var crashContent by remember { mutableStateOf<String?>(null) }
             OutlinedButton(onClick = { showConfirm = true }) { Text("Reset to defaults") }
+            Spacer(Modifier.height(8.dp))
+            OutlinedButton(onClick = {
+                crashContent = com.focusedreader.CrashLogger.read(ctx) ?: "No crash on record."
+            }) { Text("View last crash") }
+            crashContent?.let { content ->
+                AlertDialog(
+                    onDismissRequest = { crashContent = null },
+                    title = { Text("Last crash") },
+                    text = {
+                        Column(Modifier.verticalScroll(rememberScrollState())) {
+                            Text(content, style = MaterialTheme.typography.bodySmall)
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            crashContent = null
+                            val share = Intent(Intent.ACTION_SEND).apply {
+                                type = "text/plain"
+                                putExtra(Intent.EXTRA_SUBJECT, "Focused Reader crash log")
+                                putExtra(Intent.EXTRA_TEXT, content)
+                            }
+                            ctx.startActivity(Intent.createChooser(share, "Share crash log").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                        }) { Text("Share") }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = {
+                            com.focusedreader.CrashLogger.clear(ctx)
+                            crashContent = null
+                        }) { Text("Clear") }
+                    }
+                )
+            }
             if (showConfirm) {
                 AlertDialog(
                     onDismissRequest = { showConfirm = false },
