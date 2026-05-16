@@ -7,6 +7,7 @@ import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.text.PDFTextStripper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.InputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -22,9 +23,12 @@ class FilePicker @Inject constructor() {
                         PDFTextStripper().getText(doc)
                     }
                 } else {
-                    stream.bufferedReader().readText()
+                    readTextFromStream(stream)
                 }
             }
         }.getOrNull()
     }
+
+    internal fun readTextFromStream(stream: InputStream): String =
+        stream.bufferedReader().use { it.readText() }
 }

@@ -67,11 +67,17 @@ class HapticController @Inject constructor(
         }
     }
 
-    private fun pickEffect(intensityPct: Int): VibrationEffect {
-        return when {
-            intensityPct <= 11 -> VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK)
-            intensityPct <= 22 -> VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
-            else -> VibrationEffect.createPredefined(VibrationEffect.EFFECT_HEAVY_CLICK)
-        }
+    private fun pickEffect(intensityPct: Int): VibrationEffect = when (chooseEffectId(intensityPct)) {
+        EffectId.TICK -> VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK)
+        EffectId.CLICK -> VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
+        EffectId.HEAVY_CLICK -> VibrationEffect.createPredefined(VibrationEffect.EFFECT_HEAVY_CLICK)
     }
+}
+
+internal enum class EffectId { TICK, CLICK, HEAVY_CLICK }
+
+internal fun chooseEffectId(intensityPct: Int): EffectId = when {
+    intensityPct <= 11 -> EffectId.TICK
+    intensityPct <= 22 -> EffectId.CLICK
+    else -> EffectId.HEAVY_CLICK
 }

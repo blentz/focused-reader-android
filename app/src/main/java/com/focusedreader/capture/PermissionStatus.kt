@@ -3,7 +3,6 @@ package com.focusedreader.capture
 import android.content.ComponentName
 import android.content.Context
 import android.provider.Settings
-import android.text.TextUtils
 
 object PermissionStatus {
     fun isAccessibilityServiceEnabled(ctx: Context): Boolean {
@@ -11,14 +10,19 @@ object PermissionStatus {
         val enabled = Settings.Secure.getString(
             ctx.contentResolver,
             Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
-        ) ?: return false
-        val splitter = TextUtils.SimpleStringSplitter(':')
-        splitter.setString(enabled)
-        while (splitter.hasNext()) {
-            val component = splitter.next()
-            if (component.equals(expected, ignoreCase = true)) return true
-            if (component.contains(ctx.packageName) && component.contains("FocusedReaderA11yService")) return true
+        )
+        return containsService(enabled, ctx.packageName, expected)
+    }
+
+    internal fun containsService(
+        enabledServices: String?,
+        packageName: String,
+        expectedComponent: String
+    ): Boolean {
+        if (enabledServices.isNullOrBlank()) return false
+        return enabledServices.split(':').any { component ->
+            component.equals(expectedComponent, ignoreCase = true) ||
+                (component.contains(packageName) && component.contains("FocusedReaderA11yService"))
         }
-        return false
     }
 }
