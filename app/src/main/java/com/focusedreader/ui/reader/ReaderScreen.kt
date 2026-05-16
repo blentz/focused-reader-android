@@ -101,11 +101,19 @@ fun ReaderScreen(
     ) {
         when (val sst = state) {
             ReaderState.Idle -> Text("No session", color = palette.word, modifier = Modifier.align(Alignment.Center))
-            is ReaderState.Reading -> OrpWord(
-                word = sst.tokens.getOrNull(sst.index) ?: "",
-                wordColor = palette.word, orpColor = palette.orp,
-                fontSize = fontSize, fontFamily = fontFamily
-            )
+            is ReaderState.Reading -> {
+                val word = sst.tokens.getOrNull(sst.index) ?: ""
+                val scale = when {
+                    word.length <= 8 -> 1.0f
+                    word.length <= 16 -> 0.8f
+                    else -> 0.6f
+                }
+                OrpWord(
+                    word = word,
+                    wordColor = palette.word, orpColor = palette.orp,
+                    fontSize = (fontSize.value * scale).sp, fontFamily = fontFamily
+                )
+            }
             is ReaderState.Paused -> PauseOverlay(
                 wpm = sst.wpm,
                 onResume = { vm.togglePause() },
