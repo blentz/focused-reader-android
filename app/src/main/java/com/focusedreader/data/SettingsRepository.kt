@@ -3,7 +3,6 @@ package com.focusedreader.data
 import android.content.Context
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
-import com.focusedreader.ui.theme.PaletteMode
 import com.focusedreader.ui.theme.ThemeMode
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
@@ -25,7 +24,6 @@ data class Settings(
     val ttsEnabled: Boolean,
     val ttsWpmCap: Int,
     val themeMode: ThemeMode,
-    val paletteMode: PaletteMode,
     val keepScreenAwake: Boolean,
     val font: ReaderFont
 )
@@ -42,7 +40,6 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val ctx
         val TTS = booleanPreferencesKey("tts_enabled")
         val TTS_CAP = intPreferencesKey("tts_cap")
         val THEME = stringPreferencesKey("theme")
-        val PALETTE = stringPreferencesKey("palette")
         val KEEP_AWAKE = booleanPreferencesKey("keep_awake")
         val FONT = stringPreferencesKey("font")
     }
@@ -58,7 +55,6 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val ctx
             ttsEnabled = p[Keys.TTS] ?: false,
             ttsWpmCap = p[Keys.TTS_CAP] ?: 400,
             themeMode = ThemeMode.valueOf(p[Keys.THEME] ?: ThemeMode.AUTO.name),
-            paletteMode = PaletteMode.valueOf(p[Keys.PALETTE] ?: PaletteMode.SOFT.name),
             keepScreenAwake = p[Keys.KEEP_AWAKE] ?: true,
             font = ReaderFont.valueOf(p[Keys.FONT] ?: ReaderFont.LEXEND.name),
         )
@@ -73,7 +69,6 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val ctx
     suspend fun setTtsEnabled(v: Boolean) = edit { it[Keys.TTS] = v }
     suspend fun setTtsCap(v: Int) = edit { it[Keys.TTS_CAP] = v.coerceIn(100, 900) }
     suspend fun setTheme(v: ThemeMode) = edit { it[Keys.THEME] = v.name }
-    suspend fun setPalette(v: PaletteMode) = edit { it[Keys.PALETTE] = v.name }
     suspend fun setKeepAwake(v: Boolean) = edit { it[Keys.KEEP_AWAKE] = v }
     suspend fun setFont(v: ReaderFont) = edit { it[Keys.FONT] = v.name }
 

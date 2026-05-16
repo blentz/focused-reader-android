@@ -6,7 +6,6 @@ import com.focusedreader.data.HapticMode
 import com.focusedreader.data.ReaderFont
 import com.focusedreader.data.Settings
 import com.focusedreader.data.SettingsRepository
-import com.focusedreader.ui.theme.PaletteMode
 import com.focusedreader.ui.theme.ThemeMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -27,7 +26,6 @@ class SettingsViewModel @Inject constructor(private val repo: SettingsRepository
     fun setHapticIntensity(v: Int) = viewModelScope.launch { repo.setHapticIntensity(v) }
     fun setTts(v: Boolean) = viewModelScope.launch { repo.setTtsEnabled(v) }
     fun setTheme(t: ThemeMode) = viewModelScope.launch { repo.setTheme(t) }
-    fun setPalette(p: PaletteMode) = viewModelScope.launch { repo.setPalette(p) }
     fun setKeepAwake(v: Boolean) = viewModelScope.launch { repo.setKeepAwake(v) }
     fun setFont(v: ReaderFont) = viewModelScope.launch { repo.setFont(v) }
 }

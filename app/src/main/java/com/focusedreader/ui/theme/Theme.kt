@@ -8,12 +8,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 
-val LocalReaderPalette = staticCompositionLocalOf { ReaderPalette.DarkSoft }
+val LocalReaderPalette = staticCompositionLocalOf { ReaderPalette.Dark }
 
 @Composable
 fun FocusedReaderTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    readerPalette: ReaderPalette = if (darkTheme) ReaderPalette.DarkSoft else ReaderPalette.LightSoft,
+    readerPalette: ReaderPalette = if (darkTheme) ReaderPalette.Dark else ReaderPalette.Light,
     content: @Composable () -> Unit
 ) {
     val colors = if (darkTheme) darkColorScheme() else lightColorScheme()

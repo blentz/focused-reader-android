@@ -19,7 +19,6 @@ import androidx.compose.ui.Modifier
 import com.focusedreader.data.SettingsRepository
 import com.focusedreader.nav.FocusedReaderNavGraph
 import com.focusedreader.ui.theme.FocusedReaderTheme
-import com.focusedreader.ui.theme.PaletteMode
 import com.focusedreader.ui.theme.ThemeMode
 import com.focusedreader.ui.theme.effectiveThemeMode
 import com.focusedreader.ui.theme.palette
@@ -42,12 +41,11 @@ class MainActivity : ComponentActivity() {
         setContent {
             val s by settings.settings.collectAsState(initial = null)
             val themeMode = s?.themeMode ?: ThemeMode.AUTO
-            val paletteMode = s?.paletteMode ?: PaletteMode.SOFT
             val systemDark = isSystemInDarkTheme()
             val effective = effectiveThemeMode(themeMode, systemDark)
             FocusedReaderTheme(
                 darkTheme = effective == ThemeMode.DARK,
-                readerPalette = palette(effective, paletteMode)
+                readerPalette = palette(effective)
             ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),

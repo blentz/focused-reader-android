@@ -14,7 +14,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.focusedreader.data.HapticMode
 import com.focusedreader.data.ReaderFont
-import com.focusedreader.ui.theme.PaletteMode
 import com.focusedreader.ui.theme.ThemeMode
 
 @OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
@@ -56,11 +55,6 @@ fun SettingsScreen(
             Row {
                 ThemeMode.values().forEach { t ->
                     FilterChip(selected = current.themeMode == t, onClick = { vm.setTheme(t) }, label = { Text(t.name) }, modifier = Modifier.padding(end = 4.dp))
-                }
-            }
-            Row {
-                PaletteMode.values().forEach { p ->
-                    FilterChip(selected = current.paletteMode == p, onClick = { vm.setPalette(p) }, label = { Text(p.name) }, modifier = Modifier.padding(end = 4.dp))
                 }
             }
         }
