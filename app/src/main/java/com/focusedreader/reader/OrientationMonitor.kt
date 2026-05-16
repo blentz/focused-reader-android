@@ -19,7 +19,7 @@ enum class FaceOrientation { UP, DOWN, UNKNOWN }
 class OrientationMonitor @Inject constructor(
     @ApplicationContext private val ctx: Context
 ) {
-    fun orientationEvents(debounceMs: Long = 500): Flow<FaceOrientation> = callbackFlow {
+    fun orientationEvents(debounceMs: Long = 1500): Flow<FaceOrientation> = callbackFlow {
         val sm = ctx.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
         val sensor = sm?.getDefaultSensor(Sensor.TYPE_GRAVITY)
         if (sm == null || sensor == null) {
@@ -29,7 +29,7 @@ class OrientationMonitor @Inject constructor(
         }
 
         var lastEmit = 0L
-        var lastOrientation: FaceOrientation = FaceOrientation.UNKNOWN
+        val confirmer = OrientationConfirmer()
 
         val listener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent) {
@@ -39,12 +39,11 @@ class OrientationMonitor @Inject constructor(
                     z < -7f -> FaceOrientation.DOWN
                     else -> return
                 }
+                val confirmed = confirmer.observe(o) ?: return
                 val now = System.currentTimeMillis()
-                if (o == lastOrientation) return
                 if (now - lastEmit < debounceMs) return
-                lastOrientation = o
                 lastEmit = now
-                trySend(o)
+                trySend(confirmed)
             }
 
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}

@@ -91,7 +91,15 @@ class ReaderViewModel @Inject constructor(
     }
 
     private fun startEngine(idx: Int, wpm: Int) {
-        engine.start(tokens, idx, wpm)
+        engine.start(tokens, idx, wpm, onComplete = ::onReadingComplete)
+    }
+
+    private fun onReadingComplete() {
+        viewModelScope.launch {
+            kotlinx.coroutines.delay(1500)
+            sessions.updatePosition(0)
+            _state.value = ReaderState.Idle
+        }
     }
 
     fun togglePause() {

@@ -18,14 +18,21 @@ class RsvpEngine(private val dispatcher: CoroutineDispatcher) {
     private var tokens: List<String> = emptyList()
     private var current: Int = 0
     private val wpmFlow = MutableStateFlow(300)
+    private var onComplete: () -> Unit = {}
 
     private val _index = MutableSharedFlow<Int>(replay = 1, extraBufferCapacity = 64)
     val index: SharedFlow<Int> = _index.asSharedFlow()
 
-    fun start(tokens: List<String>, startIndex: Int, wpm: Int) {
+    fun start(
+        tokens: List<String>,
+        startIndex: Int,
+        wpm: Int,
+        onComplete: () -> Unit = {}
+    ) {
         this.tokens = tokens
         this.current = startIndex
         this.wpmFlow.value = Wpm.clamp(wpm)
+        this.onComplete = onComplete
         launchTickLoop(emitFirst = true)
     }
 
@@ -44,11 +51,15 @@ class RsvpEngine(private val dispatcher: CoroutineDispatcher) {
                     _index.emit(current)
                 }
             }
+            // Natural completion (cancellation throws and skips this line).
+            if (current >= tokens.size && tokens.isNotEmpty()) {
+                onComplete()
+            }
         }
     }
 
     fun pause() { job?.cancel(); job = null }
-    fun resume(wpm: Int) { start(tokens, current, wpm) }
+    fun resume(wpm: Int) { start(tokens, current, wpm, onComplete) }
     fun setWpm(wpm: Int) {
         wpmFlow.value = Wpm.clamp(wpm)
         // Reschedule the in-flight delay with the new cadence if running.
