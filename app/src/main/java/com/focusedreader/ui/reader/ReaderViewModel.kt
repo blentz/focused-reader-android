@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.focusedreader.data.SessionRepository
 import com.focusedreader.data.SettingsRepository
 import com.focusedreader.reader.FaceOrientation
+import com.focusedreader.reader.HapticController
 import com.focusedreader.reader.OrientationMonitor
 import com.focusedreader.reader.ReaderState
 import com.focusedreader.reader.RsvpEngine
@@ -23,7 +24,8 @@ import javax.inject.Inject
 class ReaderViewModel @Inject constructor(
     private val sessions: SessionRepository,
     private val settings: SettingsRepository,
-    private val orientation: OrientationMonitor
+    private val orientation: OrientationMonitor,
+    private val haptic: HapticController
 ) : ViewModel() {
 
     private val engine = RsvpEngine(Dispatchers.Default)
@@ -52,6 +54,9 @@ class ReaderViewModel @Inject constructor(
                         else -> cur
                     }
                 }
+                val s = settings.settings.first()
+                val word = tokens.getOrNull(idx) ?: ""
+                haptic.tick(word, s.hapticMode, s.hapticIntensityPct)
                 saveCounter++
                 if (saveCounter % 5 == 0) sessions.updatePosition(idx)
             }
