@@ -1,2 +1,2 @@
 package com.focusedreader.data
-enum class ImportSource { SHARE, A11Y, CLIPBOARD }
+enum class ImportSource { SHARE, A11Y, CLIPBOARD, FILE }

@@ -3,6 +3,8 @@ package com.focusedreader.ui.home
 import android.content.Intent
 import android.provider.Settings as AndroidSettings
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -39,6 +41,21 @@ fun HomeScreen(
         onDispose { lifecycleOwner.lifecycle.removeObserver(obs) }
     }
 
+    val filePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            vm.importFromFile(uri) { result ->
+                val msg = when (result) {
+                    ImportTextUseCase.Result.Empty -> "File was empty"
+                    ImportTextUseCase.Result.Ok -> "Imported from file"
+                    ImportTextUseCase.Result.FetchFailed -> "Failed to read file"
+                }
+                Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     HomeScreenContent(
         session = session,
         a11yEnabled = a11yEnabled,
@@ -59,7 +76,8 @@ fun HomeScreen(
                 }
                 Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show()
             }
-        }
+        },
+        onOpenFile = { filePickerLauncher.launch(arrayOf("text/plain")) }
     )
 }
 
@@ -70,7 +88,8 @@ fun HomeScreenContent(
     onRead: () -> Unit,
     onSettings: () -> Unit,
     onEnableA11y: () -> Unit,
-    onPasteFromClipboard: () -> Unit
+    onPasteFromClipboard: () -> Unit,
+    onOpenFile: () -> Unit
 ) {
     Column(
         Modifier.fillMaxSize().padding(24.dp),
@@ -110,6 +129,8 @@ fun HomeScreenContent(
         Button(onClick = onRead, enabled = session != null) { Text("Read") }
         Spacer(Modifier.height(12.dp))
         OutlinedButton(onClick = onPasteFromClipboard) { Text("Paste from clipboard") }
+        Spacer(Modifier.height(12.dp))
+        OutlinedButton(onClick = onOpenFile) { Text("Open file…") }
         Spacer(Modifier.height(12.dp))
         OutlinedButton(onClick = onSettings) { Text("Settings") }
     }

@@ -17,8 +17,13 @@ data class ReaderPalette(
     }
 }
 
-enum class ThemeMode { LIGHT, DARK }
+enum class ThemeMode { LIGHT, DARK, AUTO }
 enum class PaletteMode { PURE, SOFT }
+
+fun effectiveThemeMode(themeMode: ThemeMode, systemDark: Boolean): ThemeMode = when (themeMode) {
+    ThemeMode.AUTO -> if (systemDark) ThemeMode.DARK else ThemeMode.LIGHT
+    else -> themeMode
+}
 
 fun palette(theme: ThemeMode, mode: PaletteMode): ReaderPalette = when (theme to mode) {
     ThemeMode.LIGHT to PaletteMode.PURE -> ReaderPalette.LightPure

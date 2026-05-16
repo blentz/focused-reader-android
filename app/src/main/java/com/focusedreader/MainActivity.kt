@@ -9,6 +9,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -20,6 +21,7 @@ import com.focusedreader.nav.FocusedReaderNavGraph
 import com.focusedreader.ui.theme.FocusedReaderTheme
 import com.focusedreader.ui.theme.PaletteMode
 import com.focusedreader.ui.theme.ThemeMode
+import com.focusedreader.ui.theme.effectiveThemeMode
 import com.focusedreader.ui.theme.palette
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -39,11 +41,13 @@ class MainActivity : ComponentActivity() {
         maybeRequestNotificationPermission()
         setContent {
             val s by settings.settings.collectAsState(initial = null)
-            val themeMode = s?.themeMode ?: ThemeMode.DARK
+            val themeMode = s?.themeMode ?: ThemeMode.AUTO
             val paletteMode = s?.paletteMode ?: PaletteMode.SOFT
+            val systemDark = isSystemInDarkTheme()
+            val effective = effectiveThemeMode(themeMode, systemDark)
             FocusedReaderTheme(
-                darkTheme = themeMode == ThemeMode.DARK,
-                readerPalette = palette(themeMode, paletteMode)
+                darkTheme = effective == ThemeMode.DARK,
+                readerPalette = palette(effective, paletteMode)
             ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),

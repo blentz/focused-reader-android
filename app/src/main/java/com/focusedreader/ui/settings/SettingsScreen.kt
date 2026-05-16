@@ -78,7 +78,7 @@ fun SettingsScreen(
                     FilterChip(
                         selected = current.font == f,
                         onClick = { vm.setFont(f) },
-                        label = { Text(label) },
+                        label = { Text(label, fontFamily = com.focusedreader.ui.reader.resolveFontFamily(f)) },
                         modifier = Modifier.padding(end = 4.dp)
                     )
                 }

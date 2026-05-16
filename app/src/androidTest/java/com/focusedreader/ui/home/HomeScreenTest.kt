@@ -17,7 +17,8 @@ class HomeScreenTest {
                 onRead = {},
                 onSettings = {},
                 onEnableA11y = {},
-                onPasteFromClipboard = {}
+                onPasteFromClipboard = {},
+                onOpenFile = {}
             )
         }
         rule.onNodeWithText("Read").assertIsDisplayed()

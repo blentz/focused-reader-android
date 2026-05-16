@@ -57,7 +57,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val ctx
             hapticIntensityPct = p[Keys.HAPTIC_INT] ?: 10,
             ttsEnabled = p[Keys.TTS] ?: false,
             ttsWpmCap = p[Keys.TTS_CAP] ?: 400,
-            themeMode = ThemeMode.valueOf(p[Keys.THEME] ?: ThemeMode.DARK.name),
+            themeMode = ThemeMode.valueOf(p[Keys.THEME] ?: ThemeMode.AUTO.name),
             paletteMode = PaletteMode.valueOf(p[Keys.PALETTE] ?: PaletteMode.SOFT.name),
             keepScreenAwake = p[Keys.KEEP_AWAKE] ?: true,
             font = ReaderFont.valueOf(p[Keys.FONT] ?: ReaderFont.LEXEND.name),
