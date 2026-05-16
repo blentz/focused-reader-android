@@ -1,6 +1,9 @@
-# TODO — Play Store Publishing
+# TODO — Play Store Publishing + Feature Backlog
 
-Code + CI are done. Remaining work is Google-side admin and Play Console submission.
+Scope-cut v0.2.0 removed the AccessibilityService, Quick Settings tile,
+NFC handler, Tasker receiver, and PDF support. The Play Store
+"Accessibility Permissions Declaration" gate no longer applies, so the
+calendar-time estimate for publication drops dramatically.
 
 ## Google account / one-time setup
 
@@ -12,7 +15,7 @@ Code + CI are done. Remaining work is Google-side admin and Play Console submiss
 
 - [ ] Create app entry → "Free" + category **Books & Reference**
 - [ ] Upload AAB to **Internal Testing** track first (not production)
-  - Source: `app-release.aab` from GitHub release v0.1.2
+  - Source: `app-release.aab` from GitHub release v0.2.0
 
 ## Store listing assets (already produced)
 
@@ -36,13 +39,8 @@ Code + CI are done. Remaining work is Google-side admin and Play Console submiss
 - [ ] Ads — No
 - [ ] App access — "no login required"
 
-## Hard gate: Accessibility Permissions Declaration
-
-- [ ] Submit form citing [`docs/A11Y_PURPOSE.md`](docs/A11Y_PURPOSE.md):
-  - Purpose: capture text from foreground app for speed reading
-  - Justify why Share / Clipboard / File / NFC do not cover the use case
-  - Record ≤30s video demo: enable a11y → open browser → drop shade → tap "Capture text" tile → open Focused Reader → text plays
-- [ ] Expect 1–3 review cycles. Accessibility apps face strict review; rejection possible if reviewer thinks alternatives suffice.
+Note: no AccessibilityService = no NFC declaration = no special
+permission declarations required.
 
 ## Recommended before submitting
 
@@ -51,14 +49,23 @@ Code + CI are done. Remaining work is Google-side admin and Play Console submiss
   - Rotate CI to use upload.jks
   - Give Google our existing `release.jks` as the signing key
   - Protects against key loss
-- [ ] Bump `compileSdk` + `targetSdk` to 36 before Aug 2026 (Android 16 deadline)
 - [ ] Test on physical Android 11, 14, 15 devices (we tested Android 16 only)
 - [ ] Live TalkBack walkthrough on-device
 
+## Feature backlog (post-v0.2.0)
+
+- [ ] **Multi-session library** — replace single-slot Room with a named
+  library + recent-list UI so users can switch between several texts
+  without losing their place
+- [ ] **EPUB support** — read .epub files via a maintained library
+  (e.g. jEPub). PDF was removed in v0.2.0 because pdfbox-android is
+  unmaintained; bring it back behind a vetted library if at all.
+- [ ] **Localization** — strings to es / de / pt-BR / fr
+
 ## Optional / nice-to-have
 
-- [ ] F-Droid submission (parallel; no review queue for AGPL code; wants reproducible builds)
-- [ ] Localize strings to Spanish + German
+- [ ] F-Droid submission (parallel; no review queue for AGPL code;
+  wants reproducible builds)
 - [ ] Better screenshots with UI annotations / device frames
 
 ## Time estimate
@@ -67,9 +74,7 @@ Code + CI are done. Remaining work is Google-side admin and Play Console submiss
 |---|---|
 | Account + ID verification | 1–3 days |
 | Filling Console forms | 2–4 hours |
-| Recording a11y demo video | 30 min |
 | First Internal Testing review | 1–2 days |
 | Production review (after testing) | 3–7 days |
-| Accessibility permission review | up to 2–3 weeks |
 
-**Total: 3–4 weeks** if accessibility review goes smoothly, longer if rejected.
+**Total: 1–2 weeks** for first publication.

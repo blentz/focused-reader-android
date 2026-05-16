@@ -2,6 +2,28 @@
 
 All notable changes to Focused Reader. Format roughly follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.2.0] - 2026-05-16
+
+Major scope cut + dependency / toolchain modernization.
+
+### Removed
+- **AccessibilityService + Quick Settings tile** — eliminated the Play Store accessibility-permission review gate and the security risk of an always-bound a11y service.
+- **NFC NDEF intent handling** — `android.permission.NFC` dropped, NDEF intent-filters removed from `MainActivity`.
+- **TaskerReceiver + `com.focusedreader.permission.IMPORT_TEXT`** custom permission.
+- **PDF file support** — `pdfbox-android` dependency removed. The library is unmaintained and bundled a `TrustAllX509TrustManager` that flagged the app in dependency audits. Debug APK shrank ~13.5 MB (42.3 → 28.8 MB).
+- `docs/A11Y_PURPOSE.md` (no longer needed).
+
+### Changed
+- WPM cap lowered from 900 to **400** per peer-reviewed comprehension research (Rayner et al. 2016, Schotter et al. 2014); comprehension drops sharply above ~400 WPM in RSVP.
+- WPM step slider max lowered from 100 to 50.
+- AGP 8.5.2 → 8.7.3, Kotlin 2.0.20 → 2.0.21, KSP matched.
+- Compose BOM 2024.09.02 → 2024.12.01.
+- compileSdk + targetSdk 35 → 36 (Android 16).
+- activity-compose, lifecycle, navigation-compose, core-ktx, jsoup, junit5, mockk bumped to latest patch / minor.
+
+### Manifest permissions after this release
+Only `VIBRATE` and `INTERNET`.
+
 ## [Unreleased]
 
 ### Added

@@ -68,4 +68,4 @@ Required GitHub repo secrets for the Release workflow:
 
 ## 6. Upload to Play Console
 
-Internal testing track first. Submit Permissions Declaration for the Accessibility Service citing `docs/A11Y_PURPOSE.md`. Privacy policy URL: the raw `docs/PRIVACY.md` on the GitHub repo.
+Internal testing track first. No special Permissions Declarations are required as of v0.2.0 (only `VIBRATE` + `INTERNET`). Privacy policy URL: the raw `docs/PRIVACY.md` on the GitHub repo.

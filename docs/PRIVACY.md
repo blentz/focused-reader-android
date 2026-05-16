@@ -12,7 +12,7 @@ Focused Reader does not collect, transmit, or share any personal data. Every pie
 
 | Data | Where it lives | Sent off device? |
 |---|---|---|
-| Imported reading text (clipboard / share / file / NFC / Accessibility / Tasker broadcast) | On-device Room database, single-slot, overwritten on each new import | No |
+| Imported reading text (clipboard / share / file) | On-device Room database, single-slot, overwritten on each new import | No |
 | Reading position (word index) | On-device Room database | No |
 | User settings (WPM, theme, font, haptic, TTS, etc.) | On-device DataStore preferences | No |
 | URL content (when shared text is a URL) | Fetched over HTTPS from the URL you provided, parsed in-memory, the extracted text is then stored in the Room database. The original URL is not stored. | The HTTP request goes to the URL you asked for; nothing else is sent. |
@@ -25,19 +25,10 @@ The app does not contact any first-party server. It contacts third-party servers
 |---|---|
 | `android.permission.INTERNET` | Fetch the page content when you share a URL. |
 | `android.permission.VIBRATE` | Haptic tick per word when you enable haptic feedback in Settings. |
-| `android.permission.NFC` | Read text or URLs from NFC tags you tap to the phone. |
-| `android.permission.BIND_ACCESSIBILITY_SERVICE` | See the dedicated [Accessibility Service Purpose](A11Y_PURPOSE.md) document. |
-| `android.permission.BIND_QUICK_SETTINGS_TILE` | Provide a Quick Settings tile that triggers Accessibility capture on demand. |
-
-## Accessibility Service
-
-The Accessibility Service is **idle by default**. It does **not** observe accessibility events in the background. It only walks the screen-text tree when **you** explicitly trigger a capture via the Quick Settings tile. The captured text is written to the same on-device Room database used by every other import path and never leaves your device.
-
-If you do not want to grant the Accessibility permission, you can still use the app — Share, Clipboard paste, File picker, NFC, and Tasker broadcast all work without it.
 
 ## Where text goes
 
-1. You import text via Share / Clipboard / Accessibility tile / File / NFC / Tasker.
+1. You import text via Share / Clipboard / File picker.
 2. Focused Reader stores the text in the on-device Room database (single slot, overwritten on each new import).
 3. Focused Reader displays it one word at a time on your screen.
 4. If you enable TTS, Android's on-device TextToSpeech engine speaks each word. Whether the system TTS engine sends audio to any cloud service is governed by **your selected TTS engine's** privacy policy, not ours.

@@ -1,6 +1,6 @@
 # Focused Reader (Android)
 
-A focused, configurable RSVP (Rapid Serial Visual Presentation) speed-reader for Android. Highlight text anywhere on your phone, share it, and read one word at a time at speeds from -100 to 900 WPM, with the optimal recognition point (ORP) highlighted to keep your eyes still.
+A focused, configurable RSVP (Rapid Serial Visual Presentation) speed-reader for Android. Share text from any app and read one word at a time at 100–400 WPM (or -100 to -1 in reverse), with the optimal recognition point (ORP) highlighted to keep your eyes still.
 
 ![Demo](docs/demo.gif)
 
@@ -8,28 +8,31 @@ A focused, configurable RSVP (Rapid Serial Visual Presentation) speed-reader for
 
 ## Features
 
-- **RSVP engine** — one word per tick, 100–900 WPM forward, 0 = pause, -1 to -100 = reverse
+- **RSVP engine** — one word per tick, 100–400 WPM forward, 0 = pause, -1 to -100 = reverse
 - **ORP highlighting** — middle alphanumeric letter rendered in a contrast color, visually anchored at screen center for zero eye movement
 - **Dynamic font sizing** — words scale to fill the screen, with per-word width clamp for very long words and per-bucket scaling (1–8 chars: full, 9–16: 80%, 17+: 60%)
 - **Four accessibility-focused fonts** — OpenDyslexic, Lexend, Atkinson Hyperlegible, Inclusive Sans
 - **Three text-capture paths**:
   - **Share intent** — system share sheet from any app
-  - **Accessibility Service + Quick Settings tile** — capture text from the foreground app on demand
   - **Clipboard** — paste from any source while in the foreground
+  - **File picker** — `.txt`, `.html`, `.md`
   - URLs are auto-detected and the page is fetched + extracted (HTML → readable text via Jsoup, plain-text short-circuit for `.txt` URLs)
 - **Sensor pause/resume** — flip phone face-down to pause, face-up to resume (configurable, with 2-confirmation debounce to filter noise)
 - **TTS integration** — speak each word in sync with the visual tick, with a calibration wizard that binary-searches the device's reliable WPM ceiling
 - **Haptic feedback** — per-word or per-punctuation, intensity-scaled, USAGE_HARDWARE_FEEDBACK
 - **Per-session persistence** — single-slot Room store: resume where you left off
-- **Themes** — light/dark × pure/soft palette combinations
+- **Themes** — light/dark with selectable highlight colors
 - **Pause-mode scrubbing** — slider to jump to any word position
 - **Volume keys** control speed live with an on-screen WPM HUD
 - **Keep-screen-awake** toggle for long sessions
-- **Permissions UI** — Home banner prompts to enable Accessibility service; notification permission requested on Android 13+
+
+## WPM ceiling
+
+The 400 WPM upper bound reflects peer-reviewed RSVP comprehension research (Rayner et al. 2016; Schotter et al. 2014): above ~400 WPM, comprehension drops sharply because the eye cannot re-fixate to recover missed words. Earlier versions allowed up to 900 WPM, which felt fast but discarded most of what you read.
 
 ## Build
 
-Requires an Android SDK with platform 35 installed.
+Requires an Android SDK with platform 36 installed.
 
 1. Copy `local.properties.example` to `local.properties` and set your SDK path:
    ```
@@ -44,14 +47,14 @@ Requires an Android SDK with platform 35 installed.
    ./gradlew :app:testDebugUnitTest
    ```
 
-Target: `minSdk 30`, `targetSdk 35`, Kotlin 2.0, Jetpack Compose, Hilt, Room, DataStore, Jsoup.
+Target: `minSdk 30`, `targetSdk 36`, Kotlin 2.0, Jetpack Compose, Hilt, Room, DataStore, Jsoup.
 
 ## Usage
 
 1. **Import text**
    - Share from any app's Share sheet → "Focused Reader" (URLs are fetched + extracted automatically)
    - Or open Focused Reader, tap **Paste from clipboard**
-   - Or enable the Accessibility Service (Home banner prompts you) and tap the **Capture text** Quick Settings tile while in the source app
+   - Or tap **Open file…** and pick a local `.txt` / `.md` / `.html`
 2. **Tap Read** to start playback in landscape
 3. **Volume Up / Volume Down** adjusts WPM by the configured step
 4. **Tap screen** to pause; **flip face-down** also pauses
@@ -59,19 +62,18 @@ Target: `minSdk 30`, `targetSdk 35`, Kotlin 2.0, Jetpack Compose, Hilt, Room, Da
 
 ## Settings
 
-- **Speed** — WPM (-100 to 900) and step (5–100)
+- **Speed** — WPM (-100 to 400) and step (5–50)
 - **Pause / Resume** — resume countdown delay, face-down sensor toggle
 - **Haptic** — off / per-word / per-punctuation, intensity 0–33%
 - **TTS** — enable + WPM cap + Calibrate wizard
-- **Theme** — light / dark × pure / soft
+- **Theme** — light / dark / auto + highlight color
 - **Display** — keep screen awake + font picker (4 fonts)
-- **Capture** — deep link to system Accessibility Settings
 
 ## Architecture
 
 - `data/` — Room single-slot session + DataStore preferences
 - `reader/` — RSVP engine, ORP calculator, WPM math, orientation/haptic/TTS controllers
-- `capture/` — Share receiver, Accessibility service + Quick Settings tile, clipboard importer, Jsoup URL fetcher
+- `capture/` — Share receiver, clipboard importer, file picker, Jsoup URL fetcher
 - `ui/` — Compose screens (Home, Reader, Settings, TTS calibration) and theming
 - `nav/` — Compose navigation graph
 - `di/` — Hilt module
@@ -80,7 +82,7 @@ See `docs/superpowers/specs/2026-05-16-focused-reader-android-design.md` for the
 
 ## Privacy
 
-No data leaves your device. See [PRIVACY.md](docs/PRIVACY.md) for the full policy and [A11Y_PURPOSE.md](docs/A11Y_PURPOSE.md) for the Accessibility Service justification (required for Google Play review).
+No data leaves your device. See [PRIVACY.md](docs/PRIVACY.md) for the full policy.
 
 ## License
 
