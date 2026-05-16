@@ -78,6 +78,10 @@ Target: `minSdk 30`, `targetSdk 35`, Kotlin 2.0, Jetpack Compose, Hilt, Room, Da
 
 See `docs/superpowers/specs/2026-05-16-focused-reader-android-design.md` for the original design document and `docs/superpowers/plans/2026-05-16-focused-reader-android.md` for the implementation plan.
 
+## Privacy
+
+No data leaves your device. See [PRIVACY.md](docs/PRIVACY.md) for the full policy and [A11Y_PURPOSE.md](docs/A11Y_PURPOSE.md) for the Accessibility Service justification (required for Google Play review).
+
 ## License
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, version 3.
