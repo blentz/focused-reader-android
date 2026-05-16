@@ -1,13 +1,7 @@
 package com.focusedreader
 
 import android.content.Intent
-import android.net.Uri
-import android.nfc.NdefMessage
-import android.nfc.NdefRecord
-import android.nfc.NfcAdapter
-import android.os.Build
 import android.os.Bundle
-import android.os.Parcelable
 import android.view.KeyEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -82,46 +76,7 @@ class MainActivity : ComponentActivity() {
             "com.focusedreader.action.PASTE_CLIPBOARD" -> intentRouter.emit(RouterEvent.PasteClipboard)
             "com.focusedreader.action.RESUME" -> intentRouter.emit(RouterEvent.Resume)
             "com.focusedreader.action.OPEN_FILE" -> intentRouter.emit(RouterEvent.OpenFile)
-            NfcAdapter.ACTION_NDEF_DISCOVERED -> handleNfcIntent(intent)
         }
-    }
-
-    @Suppress("DEPRECATION")
-    private fun handleNfcIntent(intent: Intent) {
-        // Try NDEF messages payload first.
-        val rawMsgs: Array<Parcelable>? =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES, Parcelable::class.java)
-            } else {
-                intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES)
-            }
-        val payload = rawMsgs?.firstOrNull()?.let { (it as? NdefMessage)?.records?.firstOrNull() }
-            ?.let { extractNdefPayload(it) }
-        val text = payload ?: intent.dataString
-        if (!text.isNullOrBlank()) {
-            intentRouter.emit(RouterEvent.ImportText(text))
-        }
-    }
-
-    private fun extractNdefPayload(record: NdefRecord): String? {
-        // Type T (text record): [status][lang...][text...]
-        if (record.tnf == NdefRecord.TNF_WELL_KNOWN && record.type.contentEquals(NdefRecord.RTD_TEXT)) {
-            val payload = record.payload
-            if (payload.isEmpty()) return null
-            val status = payload[0].toInt()
-            val langLen = status and 0x3F
-            val encoding = if (status and 0x80 == 0) Charsets.UTF_8 else Charsets.UTF_16
-            return runCatching {
-                String(payload, 1 + langLen, payload.size - 1 - langLen, encoding)
-            }.getOrNull()
-        }
-        if (record.tnf == NdefRecord.TNF_WELL_KNOWN && record.type.contentEquals(NdefRecord.RTD_URI)) {
-            return runCatching { record.toUri()?.toString() }.getOrNull()
-        }
-        if (record.tnf == NdefRecord.TNF_ABSOLUTE_URI) {
-            return runCatching { String(record.type, Charsets.UTF_8) }.getOrNull()
-        }
-        return null
     }
 
     private fun publishShareTargetShortcut() {
