@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.focusedreader.reader.OrpCalculator
 import com.focusedreader.reader.ReaderState
 import com.focusedreader.ui.theme.LocalReaderPalette
 
@@ -103,15 +104,34 @@ fun ReaderScreen(
             ReaderState.Idle -> Text("No session", color = palette.word, modifier = Modifier.align(Alignment.Center))
             is ReaderState.Reading -> {
                 val word = sst.tokens.getOrNull(sst.index) ?: ""
-                val scale = when {
+                val bucketScale = when {
                     word.length <= 8 -> 1.0f
                     word.length <= 16 -> 0.8f
                     else -> 0.6f
                 }
+                val candidate = (fontSize.value * bucketScale).sp
+                val finalSize = remember(word, candidate, fontFamily, configuration.screenWidthDp) {
+                    if (word.isEmpty()) candidate
+                    else {
+                        val style = TextStyle(fontSize = candidate, fontFamily = fontFamily, fontWeight = FontWeight.Medium)
+                        val split = OrpCalculator.split(word)
+                        val leftW = if (split.left.isEmpty()) 0 else measurer.measure(split.left, style, maxLines = 1).size.width
+                        val pivotW = measurer.measure(split.pivot.toString(), style, maxLines = 1).size.width
+                        val rightW = if (split.right.isEmpty()) 0 else measurer.measure(split.right, style, maxLines = 1).size.width
+                        val anchorPx = with(density) { (configuration.screenWidthDp.dp * 0.38f).toPx() }
+                        val screenPx = with(density) { (configuration.screenWidthDp.dp * 0.97f).toPx() }
+                        val leftNeed = (leftW + pivotW / 2f).coerceAtLeast(1f)
+                        val rightNeed = (rightW + pivotW / 2f).coerceAtLeast(1f)
+                        val leftScale = anchorPx / leftNeed
+                        val rightScale = (screenPx - anchorPx) / rightNeed
+                        val widthScale = minOf(leftScale, rightScale, 1f)
+                        (candidate.value * widthScale).sp
+                    }
+                }
                 OrpWord(
                     word = word,
                     wordColor = palette.word, orpColor = palette.orp,
-                    fontSize = (fontSize.value * scale).sp, fontFamily = fontFamily
+                    fontSize = finalSize, fontFamily = fontFamily
                 )
             }
             is ReaderState.Paused -> PauseOverlay(
