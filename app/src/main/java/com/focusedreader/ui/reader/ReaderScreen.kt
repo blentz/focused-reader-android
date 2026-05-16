@@ -136,6 +136,9 @@ fun ReaderScreen(
             }
             is ReaderState.Paused -> PauseOverlay(
                 wpm = sst.wpm,
+                index = sst.index,
+                total = sst.tokens.size,
+                onSeek = { vm.seekTo(it) },
                 onResume = { vm.togglePause() },
                 onStop = { vm.stop(); onExit() },
                 onSettings = onSettings,
@@ -145,17 +148,48 @@ fun ReaderScreen(
                 Text("Resuming in ${sst.secondsLeft}…", color = palette.word)
             }
         }
+
+        // Volume-key WPM HUD
+        var hudWpm by remember { mutableStateOf<Int?>(null) }
+        LaunchedEffect(Unit) {
+            vm.wpmHudPulse.collect { wpm ->
+                hudWpm = wpm
+                kotlinx.coroutines.delay(1500)
+                if (hudWpm == wpm) hudWpm = null
+            }
+        }
+        hudWpm?.let { wpm ->
+            Surface(
+                color = palette.word.copy(alpha = 0.85f),
+                shape = MaterialTheme.shapes.small,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(16.dp)
+            ) {
+                Text(
+                    "$wpm WPM",
+                    color = palette.background,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                )
+            }
+        }
     }
 }
 
 @Composable
 private fun PauseOverlay(
     wpm: Int,
+    index: Int,
+    total: Int,
+    onSeek: (Int) -> Unit,
     onResume: () -> Unit,
     onStop: () -> Unit,
     onSettings: () -> Unit,
     palette: com.focusedreader.ui.theme.ReaderPalette
 ) {
+    var scrub by remember(index) { mutableStateOf(index.toFloat()) }
+    val maxIdx = (total - 1).coerceAtLeast(0).toFloat()
     Column(
         Modifier.fillMaxSize().padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -163,7 +197,16 @@ private fun PauseOverlay(
     ) {
         Text("Paused", color = palette.word)
         Text("$wpm WPM", color = palette.word)
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(16.dp))
+        Text("Position: ${scrub.toInt()} / $total", color = palette.word)
+        Slider(
+            value = scrub,
+            onValueChange = { scrub = it },
+            onValueChangeFinished = { onSeek(scrub.toInt()) },
+            valueRange = 0f..maxIdx.coerceAtLeast(0f),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp)
+        )
+        Spacer(Modifier.height(16.dp))
         Button(onClick = onResume) { Text("Resume") }
         Spacer(Modifier.height(8.dp))
         OutlinedButton(onClick = onStop) { Text("Stop") }

@@ -15,9 +15,12 @@ import com.focusedreader.reader.WordTokenizer
 import com.focusedreader.reader.Wpm
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -45,6 +48,12 @@ class ReaderViewModel @Inject constructor(
 
     val readerSettings: StateFlow<Settings?> = settings.settings
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    /** Emits a value each time WPM is bumped by the user. UI shows a brief HUD. */
+    private val _wpmHudPulse = MutableSharedFlow<Int>(extraBufferCapacity = 8)
+    val wpmHudPulse: SharedFlow<Int> = _wpmHudPulse.asSharedFlow()
+
+    fun tokenCount(): Int = tokens.size
 
     private var tokens: List<String> = emptyList()
     private var saveCounter = 0
@@ -144,6 +153,7 @@ class ReaderViewModel @Inject constructor(
             val newWpm = Wpm.clamp(currentWpm() + delta, max = maxWpm)
             engine.setWpm(newWpm)
             settings.setWpm(newWpm)
+            _wpmHudPulse.tryEmit(newWpm)
             _state.update { cur ->
                 when (cur) {
                     is ReaderState.Reading -> cur.copy(wpm = newWpm)
@@ -152,6 +162,22 @@ class ReaderViewModel @Inject constructor(
                     ReaderState.Idle -> cur
                 }
             }
+        }
+    }
+
+    fun seekTo(index: Int) {
+        viewModelScope.launch {
+            val target = index.coerceIn(0, (tokens.size - 1).coerceAtLeast(0))
+            sessions.updatePosition(target)
+            _state.update { cur ->
+                when (cur) {
+                    is ReaderState.Reading -> cur.copy(index = target)
+                    is ReaderState.Paused -> cur.copy(index = target)
+                    is ReaderState.Resuming -> cur.copy(index = target)
+                    ReaderState.Idle -> cur
+                }
+            }
+            if (_state.value is ReaderState.Reading) startEngine(target, currentWpm())
         }
     }
 
