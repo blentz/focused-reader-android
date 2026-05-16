@@ -27,6 +27,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.focusedreader.reader.OrpCalculator
 import com.focusedreader.reader.ReaderState
 import com.focusedreader.ui.theme.LocalReaderPalette
+import kotlinx.coroutines.launch
 
 @Composable
 fun ReaderScreen(
@@ -150,8 +151,8 @@ fun ReaderScreen(
             }
             is ReaderState.Paused -> PauseOverlay(
                 wpm = sst.wpm,
+                tokens = sst.tokens,
                 index = sst.index,
-                total = sst.tokens.size,
                 onSeek = { vm.seekTo(it) },
                 onResume = { vm.togglePause() },
                 onStop = { vm.stop(); onExit() },
@@ -217,42 +218,161 @@ fun ReaderScreen(
 @Composable
 private fun PauseOverlay(
     wpm: Int,
+    tokens: List<String>,
     index: Int,
-    total: Int,
     onSeek: (Int) -> Unit,
     onResume: () -> Unit,
     onStop: () -> Unit,
     onSettings: () -> Unit,
     palette: com.focusedreader.ui.theme.ReaderPalette
 ) {
-    var scrub by remember(index) { mutableStateOf(index.toFloat()) }
-    val maxIdx = (total - 1).coerceAtLeast(0).toFloat()
-    Column(
-        Modifier.fillMaxSize().padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+    var cursor by remember(index) { mutableStateOf(index) }
+
+    Row(
+        Modifier.fillMaxSize().padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text("Paused", color = palette.word)
-        Text("$wpm WPM", color = palette.word)
-        Spacer(Modifier.height(16.dp))
-        Text("Position: ${scrub.toInt()} / $total", color = palette.word)
-        Slider(
-            value = scrub,
-            onValueChange = { scrub = it },
-            onValueChangeFinished = { onSeek(scrub.toInt()) },
-            valueRange = 0f..maxIdx.coerceAtLeast(0f),
-            modifier = Modifier
+        Column(
+            Modifier.weight(2f).fillMaxHeight(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            DocumentPreview(
+                tokens = tokens,
+                cursor = cursor,
+                onCursorChange = { cursor = it },
+                palette = palette,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        Spacer(Modifier.width(16.dp))
+        Column(
+            Modifier.weight(1f).fillMaxHeight().padding(start = 8.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text("Paused", color = palette.word, style = MaterialTheme.typography.titleMedium)
+            Text("$wpm WPM", color = palette.word, style = MaterialTheme.typography.bodyLarge)
+            Spacer(Modifier.height(16.dp))
+            Button(onClick = {
+                if (cursor != index) onSeek(cursor)
+                onResume()
+            }) { Text(if (cursor != index) "Resume here" else "Resume") }
+            Spacer(Modifier.height(8.dp))
+            OutlinedButton(onClick = onStop) { Text("Stop") }
+            Spacer(Modifier.height(8.dp))
+            OutlinedButton(onClick = onSettings) { Text("Settings") }
+        }
+    }
+}
+
+private const val WORDS_PER_LINE = 12
+private const val WORDS_PER_PAGE = 250
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DocumentPreview(
+    tokens: List<String>,
+    cursor: Int,
+    onCursorChange: (Int) -> Unit,
+    palette: com.focusedreader.ui.theme.ReaderPalette,
+    modifier: Modifier = Modifier
+) {
+    if (tokens.isEmpty()) return
+
+    val lines = remember(tokens) {
+        tokens.chunked(WORDS_PER_LINE).map { it.joinToString(" ") }
+    }
+    val totalPages = ((tokens.size - 1) / WORDS_PER_PAGE) + 1
+
+    val currentLine = (cursor / WORDS_PER_LINE).coerceIn(0, lines.lastIndex)
+    val listState = androidx.compose.foundation.lazy.rememberLazyListState(
+        initialFirstVisibleItemIndex = (currentLine - 2).coerceAtLeast(0)
+    )
+    val scope = rememberCoroutineScope()
+
+    // Map scroll position → cursor. Center line of viewport = active line.
+    val activeLine by remember {
+        androidx.compose.runtime.derivedStateOf {
+            val first = listState.firstVisibleItemIndex
+            val visible = listState.layoutInfo.visibleItemsInfo
+            val mid = visible.getOrNull(visible.size / 2)?.index ?: first
+            mid.coerceIn(0, lines.lastIndex)
+        }
+    }
+    LaunchedEffect(activeLine) {
+        val newCursor = (activeLine * WORDS_PER_LINE).coerceAtMost(tokens.lastIndex)
+        if (newCursor != cursor) onCursorChange(newCursor)
+    }
+
+    val currentPage = (cursor / WORDS_PER_PAGE) + 1
+    var pageInput by remember(currentPage) { mutableStateOf(currentPage.toString()) }
+
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Preview window — about 5 lines tall, center line is the cursor.
+        Box(
+            Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 32.dp)
-                .semantics {
-                    contentDescription = "Reading position scrubber, word ${scrub.toInt()} of $total"
+                .height(180.dp)
+                .background(palette.background.copy(alpha = 0.6f))
+        ) {
+            androidx.compose.foundation.lazy.LazyColumn(
+                state = listState,
+                contentPadding = PaddingValues(vertical = 72.dp),
+                modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp)
+            ) {
+                items(lines.size) { idx ->
+                    val isActive = idx == activeLine
+                    Text(
+                        lines[idx],
+                        color = if (isActive) palette.orp else palette.word.copy(alpha = 0.55f),
+                        style = if (isActive) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(vertical = 6.dp)
+                    )
                 }
-        )
-        Spacer(Modifier.height(16.dp))
-        Button(onClick = onResume) { Text("Resume") }
-        Spacer(Modifier.height(8.dp))
-        OutlinedButton(onClick = onStop) { Text("Stop") }
-        Spacer(Modifier.height(8.dp))
-        OutlinedButton(onClick = onSettings) { Text("Settings") }
+            }
+            // Center reticle.
+            HorizontalDivider(
+                modifier = Modifier.align(Alignment.Center),
+                color = palette.orp.copy(alpha = 0.5f)
+            )
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                "Page",
+                color = palette.word,
+                style = MaterialTheme.typography.bodyMedium
+            )
+            OutlinedTextField(
+                value = pageInput,
+                onValueChange = { raw ->
+                    pageInput = raw.filter { it.isDigit() }.take(5)
+                },
+                singleLine = true,
+                modifier = Modifier.width(80.dp),
+                textStyle = MaterialTheme.typography.bodyMedium
+            )
+            Text(
+                "of $totalPages",
+                color = palette.word,
+                style = MaterialTheme.typography.bodyMedium
+            )
+            TextButton(onClick = {
+                val target = pageInput.toIntOrNull()?.coerceIn(1, totalPages) ?: return@TextButton
+                val targetWord = ((target - 1) * WORDS_PER_PAGE).coerceIn(0, tokens.lastIndex)
+                val targetLine = (targetWord / WORDS_PER_LINE).coerceIn(0, lines.lastIndex)
+                scope.launch { listState.scrollToItem((targetLine - 2).coerceAtLeast(0)) }
+                onCursorChange(targetWord)
+            }) { Text("Go") }
+        }
     }
 }
