@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.focusedreader.data.SessionRepository
 import com.focusedreader.data.SettingsRepository
+import com.focusedreader.reader.FaceOrientation
+import com.focusedreader.reader.OrientationMonitor
 import com.focusedreader.reader.ReaderState
 import com.focusedreader.reader.RsvpEngine
 import com.focusedreader.reader.WordTokenizer
@@ -20,7 +22,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ReaderViewModel @Inject constructor(
     private val sessions: SessionRepository,
-    private val settings: SettingsRepository
+    private val settings: SettingsRepository,
+    private val orientation: OrientationMonitor
 ) : ViewModel() {
 
     private val engine = RsvpEngine(Dispatchers.Default)
@@ -51,6 +54,17 @@ class ReaderViewModel @Inject constructor(
                 }
                 saveCounter++
                 if (saveCounter % 5 == 0) sessions.updatePosition(idx)
+            }
+        }
+        viewModelScope.launch {
+            val s = settings.settings.first()
+            if (!s.faceDownPauseEnabled) return@launch
+            orientation.orientationEvents().collect { o ->
+                when (val cur = _state.value) {
+                    is ReaderState.Reading -> if (o == FaceOrientation.DOWN) togglePause()
+                    is ReaderState.Paused -> if (o == FaceOrientation.UP) togglePause()
+                    else -> Unit
+                }
             }
         }
     }
