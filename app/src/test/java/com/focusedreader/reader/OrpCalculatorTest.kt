@@ -41,8 +41,8 @@ class OrpCalculatorTest {
         val word = "antidisestablishmentarianism"
         val s = OrpCalculator.split(word)
         assertEquals(14, OrpCalculator.pivotIndex(word.length))
-        assertEquals('m', s.pivot)
-        assertEquals("antidisestablish", s.left)
-        assertEquals("entarianism", s.right)
+        assertEquals('s', s.pivot)
+        assertEquals("antidisestabli", s.left)
+        assertEquals("hmentarianism", s.right)
     }
 }
