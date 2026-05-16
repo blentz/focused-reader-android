@@ -7,6 +7,7 @@ import com.focusedreader.data.SettingsRepository
 import com.focusedreader.reader.FaceOrientation
 import com.focusedreader.reader.HapticController
 import com.focusedreader.reader.OrientationMonitor
+import com.focusedreader.reader.TtsController
 import com.focusedreader.reader.ReaderState
 import com.focusedreader.reader.RsvpEngine
 import com.focusedreader.reader.WordTokenizer
@@ -25,7 +26,8 @@ class ReaderViewModel @Inject constructor(
     private val sessions: SessionRepository,
     private val settings: SettingsRepository,
     private val orientation: OrientationMonitor,
-    private val haptic: HapticController
+    private val haptic: HapticController,
+    private val tts: TtsController
 ) : ViewModel() {
 
     private val engine = RsvpEngine(Dispatchers.Default)
@@ -43,6 +45,7 @@ class ReaderViewModel @Inject constructor(
             val startIdx = session.position.coerceIn(0, tokens.size)
             val maxWpm = if (s.ttsEnabled) s.ttsWpmCap else Wpm.DEFAULT_MAX
             val wpm = Wpm.clamp(s.wpm, max = maxWpm)
+            if (s.ttsEnabled) tts.init()
             _state.value = ReaderState.Reading(tokens, startIdx, wpm)
             startEngine(startIdx, wpm)
         }
@@ -57,6 +60,7 @@ class ReaderViewModel @Inject constructor(
                 val s = settings.settings.first()
                 val word = tokens.getOrNull(idx) ?: ""
                 haptic.tick(word, s.hapticMode, s.hapticIntensityPct)
+                if (s.ttsEnabled) tts.speak(word)
                 saveCounter++
                 if (saveCounter % 5 == 0) sessions.updatePosition(idx)
             }
@@ -145,6 +149,7 @@ class ReaderViewModel @Inject constructor(
 
     override fun onCleared() {
         engine.shutdown()
+        tts.shutdown()
         super.onCleared()
     }
 }
