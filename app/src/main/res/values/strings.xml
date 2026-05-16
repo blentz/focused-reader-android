@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Focused Reader</string>
+    <string name="a11y_description">Captures text from the foreground app on demand.</string>
 </resources>
