@@ -43,7 +43,8 @@ class SettingsViewModelTest {
         keepScreenAwake = true,
         font = ReaderFont.LEXEND,
         orpColorArgb = SettingsRepository.DEFAULT_ORP_COLOR_ARGB,
-        hasSeenOnboarding = false
+        hasSeenOnboarding = false,
+        seenReverseHint = false
     )
 
     private lateinit var repo: SettingsRepository

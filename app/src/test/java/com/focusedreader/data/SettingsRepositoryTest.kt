@@ -59,6 +59,13 @@ class SettingsRepositoryTest {
         assertEquals(ReaderFont.LEXEND, s.font)
         assertEquals(SettingsRepository.DEFAULT_ORP_COLOR_ARGB, s.orpColorArgb)
         assertFalse(s.hasSeenOnboarding)
+        assertFalse(s.seenReverseHint)
+    }
+
+    @Test
+    fun `setReverseHintSeen persists`() = runBlocking {
+        repo.setReverseHintSeen(true)
+        assertTrue(repo.settings.first().seenReverseHint)
     }
 
     @Test

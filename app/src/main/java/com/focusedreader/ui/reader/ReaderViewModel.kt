@@ -66,6 +66,10 @@ class ReaderViewModel(
     private val _wpmHudPulse = MutableSharedFlow<Int>(extraBufferCapacity = 8)
     val wpmHudPulse: SharedFlow<Int> = _wpmHudPulse.asSharedFlow()
 
+    /** Fires once the first time WPM goes negative, to teach Vol-Up recovery. */
+    private val _reverseHintPulse = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val reverseHintPulse: SharedFlow<Unit> = _reverseHintPulse.asSharedFlow()
+
     fun tokenCount(): Int = tokens.size
 
     private var tokens: List<String> = emptyList()
@@ -174,10 +178,15 @@ class ReaderViewModel(
         viewModelScope.launch {
             val s = settings.settings.first()
             val maxWpm = if (s.ttsEnabled) s.ttsWpmCap else Wpm.DEFAULT_MAX
-            val newWpm = Wpm.clamp(currentWpm() + delta, max = maxWpm)
+            val prevWpm = currentWpm()
+            val newWpm = Wpm.clamp(prevWpm + delta, max = maxWpm)
             engine.setWpm(newWpm)
             settings.setWpm(newWpm)
             _wpmHudPulse.tryEmit(newWpm)
+            if (prevWpm >= 0 && newWpm < 0 && !s.seenReverseHint) {
+                _reverseHintPulse.tryEmit(Unit)
+                settings.setReverseHintSeen(true)
+            }
             _state.update { cur ->
                 when (cur) {
                     is ReaderState.Reading -> cur.copy(wpm = newWpm)

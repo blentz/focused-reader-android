@@ -154,6 +154,29 @@ fun ReaderScreen(
                 if (hudWpm == wpm) hudWpm = null
             }
         }
+        // One-shot reverse-direction hint
+        var showReverseHint by remember { mutableStateOf(false) }
+        LaunchedEffect(Unit) {
+            vm.reverseHintPulse.collect {
+                showReverseHint = true
+                kotlinx.coroutines.delay(3000)
+                showReverseHint = false
+            }
+        }
+        if (showReverseHint) {
+            Card(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(24.dp)
+            ) {
+                Text(
+                    "Reading backwards • Vol Up to resume forward",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                )
+            }
+        }
+
         hudWpm?.let { wpm ->
             Surface(
                 color = palette.word.copy(alpha = 0.85f),

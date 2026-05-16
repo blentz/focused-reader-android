@@ -60,7 +60,8 @@ class ReaderViewModelTest {
         keepScreenAwake = true,
         font = ReaderFont.LEXEND,
         orpColorArgb = SettingsRepository.DEFAULT_ORP_COLOR_ARGB,
-        hasSeenOnboarding = true
+        hasSeenOnboarding = true,
+        seenReverseHint = true
     )
 
     private lateinit var sessions: SessionRepository

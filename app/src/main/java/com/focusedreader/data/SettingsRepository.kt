@@ -28,7 +28,8 @@ data class Settings(
     val keepScreenAwake: Boolean,
     val font: ReaderFont,
     val orpColorArgb: Int,
-    val hasSeenOnboarding: Boolean
+    val hasSeenOnboarding: Boolean,
+    val seenReverseHint: Boolean
 )
 
 @Singleton
@@ -50,6 +51,7 @@ class SettingsRepository private constructor(private val store: DataStore<Prefer
         val FONT = stringPreferencesKey("font")
         val ORP_COLOR = intPreferencesKey("orp_color_argb")
         val ONBOARDING_SEEN = booleanPreferencesKey("onboarding_seen")
+        val REVERSE_HINT_SEEN = booleanPreferencesKey("reverse_hint_seen")
     }
 
     companion object {
@@ -75,6 +77,7 @@ class SettingsRepository private constructor(private val store: DataStore<Prefer
             font = ReaderFont.valueOf(p[Keys.FONT] ?: ReaderFont.LEXEND.name),
             orpColorArgb = p[Keys.ORP_COLOR] ?: DEFAULT_ORP_COLOR_ARGB,
             hasSeenOnboarding = p[Keys.ONBOARDING_SEEN] ?: false,
+            seenReverseHint = p[Keys.REVERSE_HINT_SEEN] ?: false,
         )
     }
 
@@ -91,6 +94,7 @@ class SettingsRepository private constructor(private val store: DataStore<Prefer
     suspend fun setFont(v: ReaderFont) = edit { it[Keys.FONT] = v.name }
     suspend fun setOrpColor(argb: Int) = edit { it[Keys.ORP_COLOR] = argb }
     suspend fun setOnboardingSeen(v: Boolean) = edit { it[Keys.ONBOARDING_SEEN] = v }
+    suspend fun setReverseHintSeen(v: Boolean) = edit { it[Keys.REVERSE_HINT_SEEN] = v }
 
     /** Clears all persisted settings; the `settings` flow falls back to defaults. */
     suspend fun resetToDefaults() {
