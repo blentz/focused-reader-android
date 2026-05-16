@@ -3,6 +3,7 @@ package com.focusedreader.ui.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.focusedreader.data.HapticMode
+import com.focusedreader.data.ReaderFont
 import com.focusedreader.data.Settings
 import com.focusedreader.data.SettingsRepository
 import com.focusedreader.ui.theme.PaletteMode
@@ -27,4 +28,6 @@ class SettingsViewModel @Inject constructor(private val repo: SettingsRepository
     fun setTts(v: Boolean) = viewModelScope.launch { repo.setTtsEnabled(v) }
     fun setTheme(t: ThemeMode) = viewModelScope.launch { repo.setTheme(t) }
     fun setPalette(p: PaletteMode) = viewModelScope.launch { repo.setPalette(p) }
+    fun setKeepAwake(v: Boolean) = viewModelScope.launch { repo.setKeepAwake(v) }
+    fun setFont(v: ReaderFont) = viewModelScope.launch { repo.setFont(v) }
 }

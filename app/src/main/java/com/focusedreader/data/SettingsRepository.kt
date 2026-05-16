@@ -25,7 +25,9 @@ data class Settings(
     val ttsEnabled: Boolean,
     val ttsWpmCap: Int,
     val themeMode: ThemeMode,
-    val paletteMode: PaletteMode
+    val paletteMode: PaletteMode,
+    val keepScreenAwake: Boolean,
+    val font: ReaderFont
 )
 
 @Singleton
@@ -41,6 +43,8 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val ctx
         val TTS_CAP = intPreferencesKey("tts_cap")
         val THEME = stringPreferencesKey("theme")
         val PALETTE = stringPreferencesKey("palette")
+        val KEEP_AWAKE = booleanPreferencesKey("keep_awake")
+        val FONT = stringPreferencesKey("font")
     }
 
     val settings: Flow<Settings> = ctx.settingsStore.data.map { p ->
@@ -55,6 +59,8 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val ctx
             ttsWpmCap = p[Keys.TTS_CAP] ?: 400,
             themeMode = ThemeMode.valueOf(p[Keys.THEME] ?: ThemeMode.DARK.name),
             paletteMode = PaletteMode.valueOf(p[Keys.PALETTE] ?: PaletteMode.SOFT.name),
+            keepScreenAwake = p[Keys.KEEP_AWAKE] ?: true,
+            font = ReaderFont.valueOf(p[Keys.FONT] ?: ReaderFont.LEXEND.name),
         )
     }
 
@@ -68,6 +74,8 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val ctx
     suspend fun setTtsCap(v: Int) = edit { it[Keys.TTS_CAP] = v.coerceIn(100, 900) }
     suspend fun setTheme(v: ThemeMode) = edit { it[Keys.THEME] = v.name }
     suspend fun setPalette(v: PaletteMode) = edit { it[Keys.PALETTE] = v.name }
+    suspend fun setKeepAwake(v: Boolean) = edit { it[Keys.KEEP_AWAKE] = v }
+    suspend fun setFont(v: ReaderFont) = edit { it[Keys.FONT] = v.name }
 
     private suspend fun edit(block: (MutablePreferences) -> Unit) {
         ctx.settingsStore.edit(block)

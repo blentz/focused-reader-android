@@ -13,6 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.focusedreader.data.HapticMode
+import com.focusedreader.data.ReaderFont
 import com.focusedreader.ui.theme.PaletteMode
 import com.focusedreader.ui.theme.ThemeMode
 
@@ -60,6 +61,26 @@ fun SettingsScreen(
             Row {
                 PaletteMode.values().forEach { p ->
                     FilterChip(selected = current.paletteMode == p, onClick = { vm.setPalette(p) }, label = { Text(p.name) }, modifier = Modifier.padding(end = 4.dp))
+                }
+            }
+        }
+        Section("Display") {
+            SwitchRow("Keep screen awake", current.keepScreenAwake) { vm.setKeepAwake(it) }
+            Text("Font")
+            Row {
+                ReaderFont.values().forEach { f ->
+                    val label = when (f) {
+                        ReaderFont.OPEN_DYSLEXIC -> "OpenDyslexic"
+                        ReaderFont.LEXEND -> "Lexend"
+                        ReaderFont.ATKINSON_HYPERLEGIBLE -> "Atkinson Hyperlegible"
+                        ReaderFont.INCLUSIVE_SANS -> "Inclusive Sans"
+                    }
+                    FilterChip(
+                        selected = current.font == f,
+                        onClick = { vm.setFont(f) },
+                        label = { Text(label) },
+                        modifier = Modifier.padding(end = 4.dp)
+                    )
                 }
             }
         }

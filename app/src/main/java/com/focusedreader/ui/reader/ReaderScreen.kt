@@ -9,7 +9,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -25,12 +31,29 @@ fun ReaderScreen(
     val state by vm.state.collectAsState()
     val palette = LocalReaderPalette.current
     val ctx = LocalContext.current
+    val rs by vm.readerSettings.collectAsState()
+    val s = rs ?: return
 
     DisposableEffect(Unit) {
         val activity = ctx as? ComponentActivity
         val prior = activity?.requestedOrientation
         activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         onDispose { activity?.requestedOrientation = prior ?: ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
+    }
+
+    DisposableEffect(s.keepScreenAwake) {
+        val activity = ctx as? ComponentActivity
+        val window = activity?.window
+        if (window != null) {
+            if (s.keepScreenAwake) {
+                window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            } else {
+                window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            }
+        }
+        onDispose {
+            window?.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
     }
 
     val step by vm.wpmStep.collectAsState()
@@ -44,27 +67,55 @@ fun ReaderScreen(
         }
     }
 
+    val fontFamily = resolveFontFamily(s.font)
+    val measurer = rememberTextMeasurer()
+    val density = LocalDensity.current
+    val configuration = LocalConfiguration.current
+
+    val tokens: List<String> = when (val cur = state) {
+        is ReaderState.Reading -> cur.tokens
+        is ReaderState.Paused -> cur.tokens
+        is ReaderState.Resuming -> cur.tokens
+        ReaderState.Idle -> emptyList()
+    }
+
+    val fontSize: TextUnit = remember(tokens, s.font, configuration.screenWidthDp) {
+        if (tokens.isEmpty()) {
+            96.sp
+        } else {
+            val widest = tokens.maxByOrNull { it.length } ?: ""
+            val refSize = 100.sp
+            val refStyle = TextStyle(fontSize = refSize, fontFamily = fontFamily, fontWeight = FontWeight.Medium)
+            val measured = measurer.measure(widest, refStyle, maxLines = 1)
+            val widthAtRef = measured.size.width.coerceAtLeast(1)
+            val targetPx = with(density) { (configuration.screenWidthDp.dp * 0.85f).toPx() }
+            val scale = (targetPx / widthAtRef).coerceIn(0.5f, 3.0f)
+            (refSize.value * scale).sp
+        }
+    }
+
     Box(
         Modifier
             .fillMaxSize()
             .background(palette.background)
             .clickable { vm.togglePause() }
     ) {
-        when (val s = state) {
+        when (val sst = state) {
             ReaderState.Idle -> Text("No session", color = palette.word, modifier = Modifier.align(Alignment.Center))
             is ReaderState.Reading -> OrpWord(
-                word = s.tokens.getOrNull(s.index) ?: "",
-                wordColor = palette.word, orpColor = palette.orp, fontSize = 96.sp
+                word = sst.tokens.getOrNull(sst.index) ?: "",
+                wordColor = palette.word, orpColor = palette.orp,
+                fontSize = fontSize, fontFamily = fontFamily
             )
             is ReaderState.Paused -> PauseOverlay(
-                wpm = s.wpm,
+                wpm = sst.wpm,
                 onResume = { vm.togglePause() },
                 onStop = { vm.stop(); onExit() },
                 onSettings = onSettings,
                 palette = palette
             )
             is ReaderState.Resuming -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Resuming in ${s.secondsLeft}…", color = palette.word)
+                Text("Resuming in ${sst.secondsLeft}…", color = palette.word)
             }
         }
     }

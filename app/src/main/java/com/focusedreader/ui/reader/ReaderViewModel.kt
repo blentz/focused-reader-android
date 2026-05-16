@@ -3,6 +3,7 @@ package com.focusedreader.ui.reader
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.focusedreader.data.SessionRepository
+import com.focusedreader.data.Settings
 import com.focusedreader.data.SettingsRepository
 import com.focusedreader.reader.FaceOrientation
 import com.focusedreader.reader.HapticController
@@ -41,6 +42,9 @@ class ReaderViewModel @Inject constructor(
     val wpmStep: StateFlow<Int> = settings.settings
         .map { it.wpmStep }
         .stateIn(viewModelScope, SharingStarted.Eagerly, 50)
+
+    val readerSettings: StateFlow<Settings?> = settings.settings
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private var tokens: List<String> = emptyList()
     private var saveCounter = 0
