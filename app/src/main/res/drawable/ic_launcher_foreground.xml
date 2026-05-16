@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Adaptive icon foreground (108x108). Safe zone is 72x72 centered (18..90).
+    Visual: three stacked "word bars" representing RSVP flow.
+    Top + bottom bars are faded (previous/next words).
+    Middle bar is fully opaque (current word) with a red ORP highlight
+    in the centre — the app's signature interaction.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- previous word (faded) -->
+    <path android:fillColor="#FAFAFA"
+          android:fillAlpha="0.35"
+          android:pathData="M28,32 H80 V40 H28 Z" />
+
+    <!-- current word (opaque) -->
+    <path android:fillColor="#FAFAFA"
+          android:pathData="M22,50 H86 V62 H22 Z" />
+
+    <!-- ORP highlight on current word -->
+    <path android:fillColor="#E53935"
+          android:pathData="M48,50 H60 V62 H48 Z" />
+
+    <!-- next word (faded) -->
+    <path android:fillColor="#FAFAFA"
+          android:fillAlpha="0.35"
+          android:pathData="M28,72 H80 V80 H28 Z" />
+</vector>
