@@ -88,7 +88,7 @@ class SettingsRepository private constructor(private val store: DataStore<Prefer
     suspend fun setHapticMode(v: HapticMode) = edit { it[Keys.HAPTIC] = v.name }
     suspend fun setHapticIntensity(v: Int) = edit { it[Keys.HAPTIC_INT] = v.coerceIn(0, 33) }
     suspend fun setTtsEnabled(v: Boolean) = edit { it[Keys.TTS] = v }
-    suspend fun setTtsCap(v: Int) = edit { it[Keys.TTS_CAP] = v.coerceIn(100, 900) }
+    suspend fun setTtsCap(v: Int) = edit { it[Keys.TTS_CAP] = v.coerceIn(100, 400) }
     suspend fun setTheme(v: ThemeMode) = edit { it[Keys.THEME] = v.name }
     suspend fun setKeepAwake(v: Boolean) = edit { it[Keys.KEEP_AWAKE] = v }
     suspend fun setFont(v: ReaderFont) = edit { it[Keys.FONT] = v.name }

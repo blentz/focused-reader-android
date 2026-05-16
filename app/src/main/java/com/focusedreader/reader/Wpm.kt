@@ -4,7 +4,7 @@ import kotlin.math.abs
 
 object Wpm {
     const val MIN = -100
-    const val DEFAULT_MAX = 900
+    const val DEFAULT_MAX = 400
 
     /**
      * Returns the delay between ticks. Caller must check for 0 wpm first

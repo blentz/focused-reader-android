@@ -129,15 +129,15 @@ class SettingsRepositoryTest {
     }
 
     @Test
-    fun `setTtsCap clamps above 900`() = runBlocking {
+    fun `setTtsCap clamps above 400`() = runBlocking {
         repo.setTtsCap(1500)
-        assertEquals(900, repo.settings.first().ttsWpmCap)
+        assertEquals(400, repo.settings.first().ttsWpmCap)
     }
 
     @Test
     fun `setTtsCap in-range stored as-is`() = runBlocking {
-        repo.setTtsCap(500)
-        assertEquals(500, repo.settings.first().ttsWpmCap)
+        repo.setTtsCap(350)
+        assertEquals(350, repo.settings.first().ttsWpmCap)
     }
 
     @Test
