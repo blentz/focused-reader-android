@@ -8,6 +8,7 @@ import androidx.navigation.compose.rememberNavController
 import com.focusedreader.ui.home.HomeScreen
 import com.focusedreader.ui.reader.ReaderScreen
 import com.focusedreader.ui.settings.SettingsScreen
+import com.focusedreader.ui.settings.TtsCalibrationScreen
 
 @Composable
 fun FocusedReaderNavGraph(nav: NavHostController = rememberNavController()) {
@@ -24,6 +25,13 @@ fun FocusedReaderNavGraph(nav: NavHostController = rememberNavController()) {
                 onSettings = { nav.navigate(Routes.SETTINGS) }
             )
         }
-        composable(Routes.SETTINGS) { SettingsScreen() }
+        composable(Routes.SETTINGS) {
+            SettingsScreen(
+                onCalibrateTts = { nav.navigate(Routes.TTS_CAL) }
+            )
+        }
+        composable(Routes.TTS_CAL) {
+            TtsCalibrationScreen(onDone = { nav.popBackStack() })
+        }
     }
 }
