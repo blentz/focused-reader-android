@@ -52,6 +52,9 @@ android {
         release {
             isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            ndk {
+                debugSymbolLevel = "SYMBOL_TABLE"
+            }
             // Apply release signing only if a keystore is configured; otherwise
             // gradle bundleRelease will fail with a clear message rather than
             // silently producing an unsigned artifact.

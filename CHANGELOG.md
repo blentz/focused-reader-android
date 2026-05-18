@@ -2,6 +2,11 @@
 
 All notable changes to Focused Reader. Format roughly follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased]
+
+### Changed
+- Release AAB now bundles native debug symbols (`ndk.debugSymbolLevel = "SYMBOL_TABLE"`) so Play Console crash reports symbolicate Room/SQLite frames.
+
 ## [0.2.1] - 2026-05-18
 
 ### Added
