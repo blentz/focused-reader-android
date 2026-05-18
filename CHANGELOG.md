@@ -2,7 +2,7 @@
 
 All notable changes to Focused Reader. Format roughly follows [Keep a Changelog](https://keepachangelog.com/).
 
-## [Unreleased]
+## [0.2.1] - 2026-05-18
 
 ### Added
 - **Document preview** in Pause overlay — replaces the position slider with a scrollable rendering of the source text; tap a line to jump there. Auto-scrolls so the line nearest the viewport centre is the current word.
